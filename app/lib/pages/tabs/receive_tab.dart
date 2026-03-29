@@ -29,6 +29,16 @@ class ReceiveTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch(receiveTabVmProvider);
+    final selectedQuickSaveMode = vm.quickSaveFromFavoritesSettings
+        ? _QuickSaveMode.favorites
+        : vm.quickSaveSettings
+        ? _QuickSaveMode.on
+        : _QuickSaveMode.off;
+    final isMobile = MediaQuery.sizeOf(context).width < 700;
+
+    if (isMobile) {
+      return _MobileReceiveLayout(vm: vm);
+    }
 
     return Stack(
       children: [
@@ -43,39 +53,58 @@ class ReceiveTab extends StatelessWidget {
               child: ColumnListView(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InitialFadeTransition(
-                          duration: const Duration(milliseconds: 300),
-                          delay: const Duration(milliseconds: 200),
-                          child: Consumer(
-                            builder: (context, ref) {
-                              final animations = ref.watch(animationProvider);
-                              final activeTab = ref.watch(homePageControllerProvider.select((state) => state.currentTab));
-                              return RotatingWidget(
-                                duration: const Duration(seconds: 15),
-                                spinning: vm.serverState != null && animations && activeTab == HomeTab.receive,
-                                child: const LocalSendLogo(withText: false),
-                              );
-                            },
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 18),
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Row(
+                        children: [
+                          InitialFadeTransition(
+                            duration: const Duration(milliseconds: 300),
+                            delay: const Duration(milliseconds: 200),
+                            child: Consumer(
+                              builder: (context, ref) {
+                                final animations = ref.watch(animationProvider);
+                                final activeTab = ref.watch(homePageControllerProvider.select((state) => state.currentTab));
+                                return RotatingWidget(
+                                  duration: const Duration(seconds: 15),
+                                  spinning: vm.serverState != null && animations && activeTab == HomeTab.receive,
+                                  child: const SizedBox(
+                                    width: 52,
+                                    height: 52,
+                                    child: LocalSendLogo(withText: false),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(vm.serverState?.alias ?? vm.aliasSettings, style: const TextStyle(fontSize: 48)),
-                        ),
-                        InitialFadeTransition(
-                          duration: const Duration(milliseconds: 300),
-                          delay: const Duration(milliseconds: 500),
-                          child: Text(
-                            vm.serverState == null ? t.general.offline : vm.localIps.map((ip) => '#${ip.visualId}').toSet().join(' '),
-                            style: const TextStyle(fontSize: 24),
-                            textAlign: TextAlign.center,
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  vm.serverState?.alias ?? vm.aliasSettings,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 6),
+                                InitialFadeTransition(
+                                  duration: const Duration(milliseconds: 300),
+                                  delay: const Duration(milliseconds: 500),
+                                  child: Text(
+                                    vm.serverState == null ? t.general.offline : vm.localIps.map((ip) => '#${ip.visualId}').toSet().join(' '),
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Padding(
@@ -108,9 +137,7 @@ class ReceiveTab extends StatelessWidget {
                               }
                             },
                             selected: {
-                              if (!vm.quickSaveSettings && !vm.quickSaveFromFavoritesSettings) _QuickSaveMode.off,
-                              if (vm.quickSaveFromFavoritesSettings) _QuickSaveMode.favorites,
-                              if (vm.quickSaveSettings) _QuickSaveMode.on,
+                              selectedQuickSaveMode,
                             },
                             segments: [
                               ButtonSegment(
@@ -138,25 +165,196 @@ class ReceiveTab extends StatelessWidget {
           ),
         ),
         _InfoBox(vm),
-        _CornerButtons(
-          showAdvanced: vm.showAdvanced,
-          showHistoryButton: vm.showHistoryButton,
-          toggleAdvanced: vm.toggleAdvanced,
-        ),
+        _CornerButtons(showHistoryButton: vm.showHistoryButton),
       ],
     );
   }
 }
 
+class _MobileReceiveLayout extends StatelessWidget {
+  final ReceiveTabVm vm;
+
+  const _MobileReceiveLayout({
+    required this.vm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final discoverable = vm.serverState == null
+        ? t.general.offline
+        : vm.localIps.isEmpty
+        ? t.general.unknown
+        : '#${vm.localIps.first.visualId}';
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+        child: ListView(
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.grid_view_rounded, size: 18, color: Color(0xFF8FA9FF)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    t.appName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF8FA9FF),
+                    ),
+                  ),
+                ),
+                CustomIconButton(
+                  onPressed: () async => context.push(() => const ReceiveHistoryPage()),
+                  child: const Icon(Icons.history, size: 20),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFF0F1B1C),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 86,
+                    height: 86,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E2127),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.laptop_mac_rounded, size: 36, color: Color(0xFF8FA9FF)),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.receiveTab.infoBox.alias.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.8,
+                            color: Color(0xFF8C93A1),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          vm.serverState?.alias ?? vm.aliasSettings,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 46,
+                            height: 0.95,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF00D38F),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                discoverable,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFFAAB1BE),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            _ReceiveNetworkHeroIllustration(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Isometric phone–router–laptop illustration for empty space on mobile Receive tab.
+class _ReceiveNetworkHeroIllustration extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth;
+        final side = maxW.clamp(200.0, 340.0);
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
+            child: Container(
+              width: side,
+              height: side,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                color: isDark ? const Color(0x221E2A3A) : const Color(0xFFF3F5F8),
+                border: Border.all(
+                  color: isDark ? const Color(0x33FFFFFF) : const Color(0x1A000000),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(17),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: Image.asset(
+                      'assets/img/receive_network_hero.png',
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _CornerButtons extends StatelessWidget {
-  final bool showAdvanced;
   final bool showHistoryButton;
-  final Future<void> Function() toggleAdvanced;
 
   const _CornerButtons({
-    required this.showAdvanced,
     required this.showHistoryButton,
-    required this.toggleAdvanced,
   });
 
   @override
@@ -168,21 +366,15 @@ class _CornerButtons extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (!showAdvanced)
-              AnimatedOpacity(
-                opacity: showHistoryButton ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: CustomIconButton(
-                  onPressed: () async {
-                    await context.push(() => const ReceiveHistoryPage());
-                  },
-                  child: const Icon(Icons.history),
-                ),
+            AnimatedOpacity(
+              opacity: showHistoryButton ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: CustomIconButton(
+                onPressed: () async {
+                  await context.push(() => const ReceiveHistoryPage());
+                },
+                child: const Icon(Icons.history),
               ),
-            CustomIconButton(
-              key: const ValueKey('info-btn'),
-              onPressed: toggleAdvanced,
-              child: const Icon(Icons.info),
             ),
           ],
         ),

@@ -87,8 +87,9 @@ enum FilePickerOption {
         FilePickerOption.app,
       ];
     } else {
-      // Desktop
+      // Desktop (macOS / Windows / Linux): gallery-style picker uses openFiles (see _pickMedia).
       return [
+        FilePickerOption.media,
         FilePickerOption.file,
         FilePickerOption.folder,
         FilePickerOption.text,
@@ -242,6 +243,11 @@ Future<void> _pickFolder(BuildContext context, Ref ref) async {
 }
 
 Future<void> _pickMedia(BuildContext context, Ref ref) async {
+  if (checkPlatform([TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux])) {
+    await _pickMediaDesktop(context, ref);
+    return;
+  }
+
   if (checkPlatform([TargetPlatform.android])) {
     await PhotoManager.requestPermissionExtend(
       requestOption: const PermissionRequestOption(
@@ -278,6 +284,40 @@ Future<void> _pickMedia(BuildContext context, Ref ref) async {
             converter: CrossFileConverters.convertAssetEntity,
           ),
         );
+  }
+}
+
+/// Photo/video selection on desktop: system file dialog filtered to common image and video types.
+Future<void> _pickMediaDesktop(BuildContext context, Ref ref) async {
+  try {
+    const images = XTypeGroup(
+      label: 'images',
+      extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'tif', 'tiff', 'raw'],
+    );
+    const videos = XTypeGroup(
+      label: 'videos',
+      extensions: ['mp4', 'mov', 'm4v', 'webm', 'mkv', 'avi', 'mpeg', 'mpg'],
+    );
+    final result = await openFiles(acceptedTypeGroups: [images, videos]);
+    if (result.isNotEmpty) {
+      await ref
+          .redux(selectedSendingFilesProvider)
+          .dispatchAsync(
+            AddFilesAction(
+              files: result,
+              converter: CrossFileConverters.convertXFile,
+            ),
+          );
+    }
+  } catch (e) {
+    if (e is PlatformException && e.code == 'CANCELED') {
+      _logger.info('User canceled media picker');
+      return;
+    }
+
+    // ignore: use_build_context_synchronously
+    await showDialog(context: context, builder: (_) => const NoPermissionDialog());
+    _logger.warning('Failed to pick media', e);
   }
 }
 

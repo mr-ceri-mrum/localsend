@@ -7,6 +7,7 @@ import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/pages/selected_files_page.dart';
+import 'package:localsend_app/pages/tabs/send_tab_mobile_layout.dart';
 import 'package:localsend_app/pages/tabs/send_tab_vm.dart';
 import 'package:localsend_app/pages/troubleshoot_page.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
@@ -16,12 +17,15 @@ import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/util/device_type_ext.dart';
 import 'package:localsend_app/util/favorites.dart';
 import 'package:localsend_app/util/file_size_helper.dart';
 import 'package:localsend_app/util/native/file_picker.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/big_button.dart';
+import 'package:localsend_app/widget/custom_progress_bar.dart';
 import 'package:localsend_app/widget/custom_icon_button.dart';
+import 'package:localsend_app/widget/device_bage.dart';
 import 'package:localsend_app/widget/dialogs/add_file_dialog.dart';
 import 'package:localsend_app/widget/dialogs/send_mode_help_dialog.dart';
 import 'package:localsend_app/widget/file_thumbnail.dart';
@@ -38,6 +42,13 @@ import 'package:routerino/routerino.dart';
 const _horizontalPadding = 15.0;
 final _options = FilePickerOption.getOptionsForPlatform();
 
+/// Mobile Send tab: hide clipboard + text tiles (still available on desktop / Add dialog if needed).
+List<FilePickerOption> _mobileSendPickerOptions() {
+  return _options
+      .where((o) => o != FilePickerOption.clipboard && o != FilePickerOption.text)
+      .toList();
+}
+
 class SendTab extends StatelessWidget {
   const SendTab();
 
@@ -50,6 +61,182 @@ class SendTab extends StatelessWidget {
         final sizingInformation = SizingInformation(MediaQuery.sizeOf(context).width);
         final buttonWidth = sizingInformation.isDesktop ? BigButton.desktopWidth : BigButton.mobileWidth;
         final ref = context.ref;
+        if (sizingInformation.isMobile) {
+          final mobilePickerOptions = _mobileSendPickerOptions();
+          final (scanningFavorites, scanningIps) =
+              ref.watch(nearbyDevicesProvider.select((s) => (s.runningFavoriteScan, s.runningIps)));
+          final animations = ref.watch(animationProvider);
+          final scanning = (scanningFavorites || scanningIps.isNotEmpty) && animations;
+
+          return Theme(
+            data: sendTabMobileTheme(),
+            child: Stack(
+              children: [
+                ResponsiveListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SendTabMobileHeader(),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              t.sendTab.quickSelect.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.8,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          if (vm.selectedFiles.isEmpty)
+                            SendTabMobileSelectionGrid(
+                              options: SendTabMobileSelectionGrid.orderedOptions(mobilePickerOptions),
+                              onOptionTap: (option) async => ref.global.dispatchAsync(
+                                PickFileAction(option: option, context: context),
+                              ),
+                            )
+                          else
+                            Card(
+                              margin: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.only(start: 15, top: 5, bottom: 15),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          t.sendTab.selection.title,
+                                          style: Theme.of(context).textTheme.titleMedium,
+                                        ),
+                                        const Spacer(),
+                                        CustomIconButton(
+                                          onPressed: () => ref.redux(selectedSendingFilesProvider).dispatch(ClearSelectionAction()),
+                                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.secondary),
+                                        ),
+                                        const SizedBox(width: 5),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(t.sendTab.selection.files(files: vm.selectedFiles.length)),
+                                    Text(t.sendTab.selection.size(size: vm.selectedFiles.fold(0, (prev, curr) => prev + curr.size).asReadableFileSize)),
+                                    const SizedBox(height: 10),
+                                    SizedBox(
+                                      height: defaultThumbnailSize,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: vm.selectedFiles.length,
+                                        itemBuilder: (context, index) {
+                                          final file = vm.selectedFiles[index];
+                                          return Padding(
+                                            padding: const EdgeInsets.only(right: 10),
+                                            child: SmartFileThumbnail.fromCrossFile(file),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                          onPressed: () async {
+                                            await context.push(() => const SelectedFilesPage());
+                                          },
+                                          child: Text(t.general.edit),
+                                        ),
+                                        const SizedBox(width: 15),
+                                        ElevatedButton.icon(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Theme.of(context).colorScheme.primary,
+                                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                          onPressed: () async {
+                                            if (mobilePickerOptions.length == 1) {
+                                              await ref.global.dispatchAsync(
+                                                PickFileAction(
+                                                  option: mobilePickerOptions.first,
+                                                  context: context,
+                                                ),
+                                              );
+                                              return;
+                                            }
+                                            await AddFileDialog.open(
+                                              context: context,
+                                              options: mobilePickerOptions,
+                                            );
+                                          },
+                                          icon: const Icon(Icons.add),
+                                          label: Text(t.general.add),
+                                        ),
+                                        const SizedBox(width: 15),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          SendTabMobileNearbySectionTitle(scanning: scanning),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4, bottom: 8),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _ScanButton(ips: vm.localIps),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (vm.nearbyDevices.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 10, left: 16, right: 16),
+                        child: Opacity(
+                          opacity: 0.3,
+                          child: DevicePlaceholderListTile(),
+                        ),
+                      ),
+                    ...vm.nearbyDevices.map((device) {
+                      final favoriteEntry = vm.favoriteDevices.findDevice(device);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
+                        child: Hero(
+                          tag: 'device-${device.ip}',
+                          child: vm.sendMode == SendMode.multiple
+                              ? _MobileMultiSendDeviceTile(
+                                  device: device,
+                                  isFavorite: favoriteEntry != null,
+                                  nameOverride: favoriteEntry?.alias,
+                                  vm: vm,
+                                )
+                              : _MobileSendDeviceTile(
+                                  device: device,
+                                  nameOverride: favoriteEntry?.alias,
+                                  onTap: () async => await vm.onTapDevice(context, device),
+                                ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 50),
+                  ],
+                ),
+                checkPlatform([TargetPlatform.macOS])
+                    ? SizedBox(height: 50, child: MoveWindow())
+                    : const SizedBox.shrink(),
+              ],
+            ),
+          );
+        }
         return Stack(
           children: [
             ResponsiveListView(
@@ -562,6 +749,168 @@ class _MultiSendDeviceListTile extends StatelessWidget {
       nameOverride: nameOverride,
       onFavoriteTap: device.ip == null ? null : () async => await vm.onToggleFavorite(context, device),
       onTap: () async => await vm.onTapDeviceMultiSend(context, device),
+    );
+  }
+}
+
+class _MobileSendDeviceTile extends StatelessWidget {
+  final Device device;
+  final String? nameOverride;
+  final VoidCallback onTap;
+
+  const _MobileSendDeviceTile({
+    required this.device,
+    required this.nameOverride,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final badgeColor = const Color(0xFF2A2E36);
+    final badgeTextColor = Colors.grey.shade300;
+
+    return _MobileDeviceCardShell(
+      device: device,
+      title: nameOverride ?? device.alias,
+      onTap: onTap,
+      subtitle: Wrap(
+        runSpacing: 8,
+        spacing: 8,
+        children: [
+          DeviceBadge(
+            backgroundColor: badgeColor,
+            foregroundColor: badgeTextColor,
+            label: device.ip != null ? 'LAN' : 'WEBRTC',
+          ),
+          if (device.deviceModel != null)
+            DeviceBadge(
+              backgroundColor: badgeColor,
+              foregroundColor: badgeTextColor,
+              label: device.deviceModel!,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MobileMultiSendDeviceTile extends StatelessWidget {
+  final Device device;
+  final bool isFavorite;
+  final String? nameOverride;
+  final SendTabVm vm;
+
+  const _MobileMultiSendDeviceTile({
+    required this.device,
+    required this.isFavorite,
+    required this.nameOverride,
+    required this.vm,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = context.ref;
+    final session = ref.watch(sendProvider).values.firstWhereOrNull((s) => s.target.ip == device.ip);
+    final double? progress;
+    if (session != null) {
+      final files = session.files.values.where((f) => f.token != null);
+      final progressNotifier = ref.watch(progressProvider);
+      final currBytes = files.fold<int>(
+        0,
+        (prev, curr) => prev + ((progressNotifier.getProgress(sessionId: session.sessionId, fileId: curr.file.id) * curr.file.size).round()),
+      );
+      final totalBytes = files.fold<int>(0, (prev, curr) => prev + curr.file.size);
+      progress = totalBytes == 0 ? 0 : currBytes / totalBytes;
+    } else {
+      progress = null;
+    }
+
+    return _MobileDeviceCardShell(
+      device: device,
+      title: nameOverride ?? device.alias,
+      onTap: () async => await vm.onTapDeviceMultiSend(context, device),
+      subtitle: session?.status.humanString != null
+          ? Text(
+              session!.status.humanString!,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF7EA0FF)),
+            )
+          : progress != null
+          ? Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: CustomProgressBar(progress: progress),
+            )
+          : const SizedBox.shrink(),
+    );
+  }
+}
+
+class _MobileDeviceCardShell extends StatelessWidget {
+  final Device device;
+  final String title;
+  final Widget subtitle;
+  final VoidCallback onTap;
+
+  const _MobileDeviceCardShell({
+    required this.device,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFF14171D),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFF232935)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 62,
+                height: 62,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E222B),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Icon(device.deviceType.icon, size: 32, color: const Color(0xFF9FB5FF)),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        height: 1.05,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    subtitle,
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF7C8191), size: 24),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -67,6 +67,7 @@ const _saveWindowPlacement = 'ls_save_window_placement';
 // Settings
 const _showToken = 'ls_show_token';
 const _aliasKey = 'ls_alias';
+const _aliasSetupCompletedKey = 'ls_alias_setup_completed';
 const _themeKey = 'ls_theme'; // now called brightness
 const _colorKey = 'ls_color';
 const _localeKey = 'ls_locale';
@@ -163,6 +164,12 @@ class PersistenceService {
 
     if (prefs.getString(_aliasKey) == null) {
       await prefs.setString(_aliasKey, generateRandomAlias());
+    }
+
+    if (prefs.getBool(_aliasSetupCompletedKey) == null) {
+      // Existing installs should not be forced through onboarding.
+      // New installs must confirm device name once.
+      await prefs.setBool(_aliasSetupCompletedKey, !isFirstAppStart);
     }
 
     if (prefs.getString(_securityContext) == null) {
@@ -279,12 +286,21 @@ class PersistenceService {
     await _prefs.setString(_aliasKey, alias);
   }
 
+  bool isAliasSetupCompleted() {
+    return _prefs.getBool(_aliasSetupCompletedKey) ?? true;
+  }
+
+  Future<void> setAliasSetupCompleted(bool completed) async {
+    await _prefs.setBool(_aliasSetupCompletedKey, completed);
+  }
+
   ThemeMode getTheme() {
     final value = _prefs.getString(_themeKey);
     if (value == null) {
-      return ThemeMode.system;
+      // Default for fresh installs.
+      return ThemeMode.dark;
     }
-    return ThemeMode.values.firstWhereOrNull((theme) => theme.name == value) ?? ThemeMode.system;
+    return ThemeMode.values.firstWhereOrNull((theme) => theme.name == value) ?? ThemeMode.dark;
   }
 
   Future<void> setTheme(ThemeMode theme) async {

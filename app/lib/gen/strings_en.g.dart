@@ -46,8 +46,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   /// en: 'English'
   String get locale => 'English';
 
-  /// en: 'LocalSend'
-  String get appName => 'LocalSend';
+  /// en: 'Share to windows'
+  String get appName => 'Share to windows';
 
   late final TranslationsGeneralEn general = TranslationsGeneralEn.internal(_root);
   late final TranslationsReceiveTabEn receiveTab = TranslationsReceiveTabEn.internal(_root);
@@ -223,6 +223,9 @@ class TranslationsSendTabEn {
   /// en: 'Send'
   String get title => 'Send';
 
+  /// en: 'Quick select'
+  String get quickSelect => 'Quick select';
+
   late final TranslationsSendTabSelectionEn selection = TranslationsSendTabSelectionEn.internal(_root);
   late final TranslationsSendTabPickerEn picker = TranslationsSendTabPickerEn.internal(_root);
 
@@ -275,6 +278,8 @@ class TranslationsSettingsTabEn {
 
   /// en: 'Advanced settings'
   String get advancedSettings => 'Advanced settings';
+
+  late final TranslationsSettingsTabMobileEn mobile = TranslationsSettingsTabMobileEn.internal(_root);
 }
 
 // Path: troubleshootPage
@@ -1146,6 +1151,36 @@ class TranslationsSettingsTabOtherEn {
 
   /// en: 'Terms of Use'
   String get termsOfUse => 'Terms of Use';
+}
+
+// Path: settingsTab.mobile
+class TranslationsSettingsTabMobileEn {
+  TranslationsSettingsTabMobileEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'General'
+  String get sectionGeneral => 'General';
+
+  /// en: 'Receive'
+  String get sectionReceive => 'Receive';
+
+  /// en: 'Incoming files from trusted devices will be saved automatically when Quick Save is enabled.'
+  String get quickSaveHint => 'Incoming files from trusted devices will be saved automatically when Quick Save is enabled.';
+
+  /// en: 'Disconnect Windows PC'
+  String get disconnectServer => 'Disconnect Windows PC';
+
+  /// en: 'Start receiving'
+  String get connectServer => 'Start receiving';
+
+  /// en: 'VERSION {version} (STABLE)'
+  String versionLabel({required Object version}) => 'VERSION ${version} (STABLE)';
+
+  /// en: 'Restart server'
+  String get restartServer => 'Restart server';
 }
 
 // Path: troubleshootPage.firewall

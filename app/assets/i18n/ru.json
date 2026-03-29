@@ -1,6 +1,6 @@
 {
   "locale": "Русский",
-  "appName": "LocalSend",
+  "appName": "Share to windows",
   "general": {
     "accept": "Принять",
     "accepted": "Принято",
@@ -8,7 +8,7 @@
     "advanced": "Подробнее",
     "cancel": "Отменить",
     "close": "Закрыть",
-    "confirm": "Подтвердить",
+    "confirm": "ОК",
     "continueStr": "Продолжить",
     "copy": "Копировать",
     "copiedToClipboard": "Скопировано в буфер обмена",
@@ -56,6 +56,7 @@
   },
   "sendTab": {
     "title": "Отправить",
+    "quickSelect": "Быстрый выбор",
     "selection": {
       "title": "Выборка",
       "files": "Файлов: {files}",
@@ -154,7 +155,16 @@
       "privacyPolicy": "Политика конфиденциальности",
       "termsOfUse": "Условия использования"
     },
-    "advancedSettings": "Расширенные настройки"
+    "advancedSettings": "Расширенные настройки",
+    "mobile": {
+      "sectionGeneral": "Общие",
+      "sectionReceive": "Получение",
+      "quickSaveHint": "Входящие файлы с доверенных устройств будут сохраняться автоматически, если включено быстрое сохранение.",
+      "disconnectServer": "Отключить ПК с Windows",
+      "connectServer": "Начать приём",
+      "versionLabel": "ВЕРСИЯ {version} (СТАБИЛЬНАЯ)",
+      "restartServer": "Перезапустить сервер"
+    }
   },
   "troubleshootPage": {
     "title": "Устранение неисправностей",
@@ -426,13 +436,13 @@
   },
   "assetPicker": {
     "@info": "Переводы для инструмента выбора медиа для Android и iPhone",
-    "confirm": "Подтвердить",
+    "confirm": "ОК",
     "cancel": "Отменить",
     "edit": "Редактировать",
     "gifIndicator": "GIF",
     "loadFailed": "Не удалось загрузить",
     "original": "Оригинал",
-    "preview": "Предпросмотр",
+    "preview": "Просмотр",
     "select": "Выбрать",
     "emptyList": "Список пуст",
     "unSupportedAssetType": "Неподдерживаемый тип файла.",

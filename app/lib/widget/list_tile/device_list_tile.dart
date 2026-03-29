@@ -18,6 +18,9 @@ class DeviceListTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteTap;
 
+  /// When false, the favorite (heart) action is hidden (e.g. mobile Send tab UX).
+  final bool showFavoriteButton;
+
   const DeviceListTile({
     required this.device,
     this.isFavorite = false,
@@ -26,6 +29,7 @@ class DeviceListTile extends StatelessWidget {
     this.progress,
     this.onTap,
     this.onFavoriteTap,
+    this.showFavoriteButton = true,
   });
 
   @override
@@ -34,7 +38,7 @@ class DeviceListTile extends StatelessWidget {
     return CustomListTile(
       icon: Icon(device.deviceType.icon, size: 46),
       title: Text(nameOverride ?? device.alias, style: const TextStyle(fontSize: 20)),
-      trailing: onFavoriteTap != null
+      trailing: showFavoriteButton && onFavoriteTap != null
           ? IconButton(
               icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: onFavoriteTap,

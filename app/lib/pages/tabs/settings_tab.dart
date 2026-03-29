@@ -14,6 +14,7 @@ import 'package:localsend_app/pages/donation/donation_page.dart';
 import 'package:localsend_app/pages/language_page.dart';
 import 'package:localsend_app/pages/settings/network_interfaces_page.dart';
 import 'package:localsend_app/pages/tabs/settings_tab_controller.dart';
+import 'package:localsend_app/pages/tabs/settings_tab_mobile_layout.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/provider/version_provider.dart';
 import 'package:localsend_app/util/alias_generator.dart';
@@ -36,7 +37,10 @@ import 'package:routerino/routerino.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsTab extends StatelessWidget {
-  const SettingsTab();
+  /// When true, always show the full (desktop-style) settings list, even on narrow screens.
+  final bool forceDesktopLayout;
+
+  const SettingsTab({super.key, this.forceDesktopLayout = false});
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +48,13 @@ class SettingsTab extends StatelessWidget {
       provider: (ref) => settingsTabControllerProvider,
       builder: (context, vm) {
         final ref = context.ref;
+        final isMobile = !forceDesktopLayout && MediaQuery.sizeOf(context).width < 700;
+        if (isMobile) {
+          return Theme(
+            data: settingsTabMobileTheme(),
+            child: SettingsTabMobileView(vm: vm),
+          );
+        }
         return Stack(
           children: [
             Padding(

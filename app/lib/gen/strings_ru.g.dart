@@ -42,7 +42,7 @@ class TranslationsRu extends Translations {
   @override
   String get locale => 'Русский';
   @override
-  String get appName => 'LocalSend';
+  String get appName => 'Share to windows';
   @override
   late final _TranslationsGeneralRu general = _TranslationsGeneralRu._(_root);
   @override
@@ -109,7 +109,7 @@ class _TranslationsGeneralRu extends TranslationsGeneralEn {
   @override
   String get close => 'Закрыть';
   @override
-  String get confirm => 'Подтвердить';
+  String get confirm => 'ОК';
   @override
   String get continueStr => 'Продолжить';
   @override
@@ -199,6 +199,8 @@ class _TranslationsSendTabRu extends TranslationsSendTabEn {
   @override
   String get title => 'Отправить';
   @override
+  String get quickSelect => 'Быстрый выбор';
+  @override
   late final _TranslationsSendTabSelectionRu selection = _TranslationsSendTabSelectionRu._(_root);
   @override
   late final _TranslationsSendTabPickerRu picker = _TranslationsSendTabPickerRu._(_root);
@@ -245,6 +247,8 @@ class _TranslationsSettingsTabRu extends TranslationsSettingsTabEn {
   late final _TranslationsSettingsTabOtherRu other = _TranslationsSettingsTabOtherRu._(_root);
   @override
   String get advancedSettings => 'Расширенные настройки';
+  @override
+  late final _TranslationsSettingsTabMobileRu mobile = _TranslationsSettingsTabMobileRu._(_root);
 }
 
 // Path: troubleshootPage
@@ -609,7 +613,7 @@ class _TranslationsAssetPickerRu extends TranslationsAssetPickerEn {
 
   // Translations
   @override
-  String get confirm => 'Подтвердить';
+  String get confirm => 'ОК';
   @override
   String get cancel => 'Отменить';
   @override
@@ -621,7 +625,7 @@ class _TranslationsAssetPickerRu extends TranslationsAssetPickerEn {
   @override
   String get original => 'Оригинал';
   @override
-  String get preview => 'Предпросмотр';
+  String get preview => 'Просмотр';
   @override
   String get select => 'Выбрать';
   @override
@@ -905,6 +909,29 @@ class _TranslationsSettingsTabOtherRu extends TranslationsSettingsTabOtherEn {
   String get privacyPolicy => 'Политика конфиденциальности';
   @override
   String get termsOfUse => 'Условия использования';
+}
+
+// Path: settingsTab.mobile
+class _TranslationsSettingsTabMobileRu extends TranslationsSettingsTabMobileEn {
+  _TranslationsSettingsTabMobileRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get sectionGeneral => 'Общие';
+  @override
+  String get sectionReceive => 'Получение';
+  @override
+  String get quickSaveHint => 'Входящие файлы с доверенных устройств будут сохраняться автоматически, если включено быстрое сохранение.';
+  @override
+  String get disconnectServer => 'Отключить ПК с Windows';
+  @override
+  String get connectServer => 'Начать приём';
+  @override
+  String versionLabel({required Object version}) => 'ВЕРСИЯ ${version} (СТАБИЛЬНАЯ)';
+  @override
+  String get restartServer => 'Перезапустить сервер';
 }
 
 // Path: troubleshootPage.firewall

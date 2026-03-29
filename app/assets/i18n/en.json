@@ -1,6 +1,6 @@
 {
   "locale": "English",
-  "appName": "LocalSend",
+  "appName": "Share to windows",
   "general": {
     "accept": "Accept",
     "accepted": "Accepted",
@@ -56,6 +56,7 @@
   },
   "sendTab": {
     "title": "Send",
+    "quickSelect": "Quick select",
     "selection": {
       "title": "Selection",
       "files": "Files: {files}",
@@ -154,7 +155,16 @@
       "privacyPolicy": "Privacy Policy",
       "termsOfUse": "Terms of Use"
     },
-    "advancedSettings": "Advanced settings"
+    "advancedSettings": "Advanced settings",
+    "mobile": {
+      "sectionGeneral": "General",
+      "sectionReceive": "Receive",
+      "quickSaveHint": "Incoming files from trusted devices will be saved automatically when Quick Save is enabled.",
+      "disconnectServer": "Disconnect Windows PC",
+      "connectServer": "Start receiving",
+      "versionLabel": "VERSION {version} (STABLE)",
+      "restartServer": "Restart server"
+    }
   },
   "troubleshootPage": {
     "title": "Troubleshoot",

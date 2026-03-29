@@ -42,7 +42,7 @@ class TranslationsEnIn extends Translations {
   @override
   String get locale => 'English(India)';
   @override
-  String get appName => 'LocalSend';
+  String get appName => 'Share to windows';
   @override
   late final _TranslationsGeneralEnIn general = _TranslationsGeneralEnIn._(_root);
   @override
