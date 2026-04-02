@@ -11,6 +11,11 @@
 		28D9F9A529638D5E0028B96E /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28D9F9A429638D5E0028B96E /* ShareViewController.swift */; };
 		28D9F9A829638D5E0028B96E /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 28D9F9A629638D5E0028B96E /* MainInterface.storyboard */; };
 		28D9F9AC29638D5E0028B96E /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 28D9F9A229638D5E0028B96E /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B2C3D4E51F60718293A4B5C1 /* LocalSendLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E51F60718293A4B5C8 /* LocalSendLiveActivity.swift */; };
+		B2C3D4E51F60718293A4B5C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2C3D4E51F60718293A4B5C9 /* Assets.xcassets */; };
+		B2C3D4E51F60718293A4B5C5 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2C3D4E51F60718293A4B5F0 /* WidgetKit.framework */; };
+		B2C3D4E51F60718293A4B5C6 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B2C3D4E51F60718293A4B5F1 /* SwiftUI.framework */; };
+		B2C3D4E51F60718293A4B5C7 /* LocalSendLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B2C3D4E51F60718293A4B5C0 /* LocalSendLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		7DA3203436DA0EAD484C6129 /* Pods_ShareExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 052009B9C8E63670A6F30787 /* Pods_ShareExtension.framework */; };
@@ -29,6 +34,13 @@
 			remoteGlobalIDString = 28D9F9A129638D5E0028B96E;
 			remoteInfo = ShareExtension;
 		};
+		B2C3D4E51F60718293A4B5D0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2C3D4E51F60718293A4B5CC;
+			remoteInfo = LocalSendLiveActivityExtension;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,6 +51,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				28D9F9AC29638D5E0028B96E /* ShareExtension.appex in Embed Foundation Extensions */,
+				B2C3D4E51F60718293A4B5C7 /* LocalSendLiveActivityExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,6 +98,13 @@
 		A2BF1CF158EF83DE50B03565 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		B97818B16CFBA751581F52D0 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		E27045CC3CCE78EFE26BEAA2 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		B2C3D4E51F60718293A4B5C0 /* LocalSendLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LocalSendLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2C3D4E51F60718293A4B5C8 /* LocalSendLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSendLiveActivity.swift; sourceTree = "<group>"; };
+		B2C3D4E51F60718293A4B5C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B2C3D4E51F60718293A4B5CA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B2C3D4E51F60718293A4B5CB /* LocalSendLiveActivityExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LocalSendLiveActivityExtension.entitlements; sourceTree = "<group>"; };
+		B2C3D4E51F60718293A4B5F0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B2C3D4E51F60718293A4B5F1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +124,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1E1A12F60718293A4B5D601 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2C3D4E51F60718293A4B5C6 /* SwiftUI.framework in Frameworks */,
+				B2C3D4E51F60718293A4B5C5 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -116,6 +145,16 @@
 				28D9F9A929638D5E0028B96E /* Info.plist */,
 			);
 			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+		A1E1A12F60718293A4B5D700 /* LocalSendLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				B2C3D4E51F60718293A4B5C8 /* LocalSendLiveActivity.swift */,
+				B2C3D4E51F60718293A4B5C9 /* Assets.xcassets */,
+				B2C3D4E51F60718293A4B5CA /* Info.plist */,
+			);
+			path = LocalSendLiveActivity;
 			sourceTree = "<group>";
 		};
 		59B9B2A902E417D8EA9C7BB8 /* Pods */ = {
@@ -145,10 +184,12 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				B2C3D4E51F60718293A4B5CB /* LocalSendLiveActivityExtension.entitlements */,
 				840EA3FB2B0910B000C0FED7 /* MyLocalSendStoreKit.storekit */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				28D9F9A329638D5E0028B96E /* ShareExtension */,
+				A1E1A12F60718293A4B5D700 /* LocalSendLiveActivity */,
 				97C146EF1CF9000F007C117D /* Products */,
 				59B9B2A902E417D8EA9C7BB8 /* Pods */,
 				C869F3F44E625CCF2D1A5B44 /* Frameworks */,
@@ -160,6 +201,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				28D9F9A229638D5E0028B96E /* ShareExtension.appex */,
+				B2C3D4E51F60718293A4B5C0 /* LocalSendLiveActivityExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -184,6 +226,8 @@
 		C869F3F44E625CCF2D1A5B44 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B2C3D4E51F60718293A4B5F0 /* WidgetKit.framework */,
+				B2C3D4E51F60718293A4B5F1 /* SwiftUI.framework */,
 				0628E22A788D91D99A60B3EB /* Pods_Runner.framework */,
 				052009B9C8E63670A6F30787 /* Pods_ShareExtension.framework */,
 			);
@@ -211,6 +255,23 @@
 			productReference = 28D9F9A229638D5E0028B96E /* ShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		B2C3D4E51F60718293A4B5CC /* LocalSendLiveActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1E1A12F60718293A4B5D800 /* Build configuration list for PBXNativeTarget "LocalSendLiveActivityExtension" */;
+			buildPhases = (
+				A1E1A12F60718293A4B5D500 /* Sources */,
+				A1E1A12F60718293A4B5D601 /* Frameworks */,
+				A1E1A12F60718293A4B5D702 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LocalSendLiveActivityExtension;
+			productName = LocalSendLiveActivityExtension;
+			productReference = B2C3D4E51F60718293A4B5C0 /* LocalSendLiveActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -230,6 +291,7 @@
 			);
 			dependencies = (
 				28D9F9AB29638D5E0028B96E /* PBXTargetDependency */,
+				B2C3D4E51F60718293A4B5D1 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -248,6 +310,9 @@
 				TargetAttributes = {
 					28D9F9A129638D5E0028B96E = {
 						CreatedOnToolsVersion = 14.0;
+					};
+					B2C3D4E51F60718293A4B5CC = {
+						CreatedOnToolsVersion = 15.0;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -270,6 +335,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				28D9F9A129638D5E0028B96E /* ShareExtension */,
+				B2C3D4E51F60718293A4B5CC /* LocalSendLiveActivityExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -292,6 +358,14 @@
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				840EA3FC2B0910B000C0FED7 /* MyLocalSendStoreKit.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1E1A12F60718293A4B5D702 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2C3D4E51F60718293A4B5C2 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +501,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1E1A12F60718293A4B5D500 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2C3D4E51F60718293A4B5C1 /* LocalSendLiveActivity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -434,6 +516,11 @@
 			isa = PBXTargetDependency;
 			target = 28D9F9A129638D5E0028B96E /* ShareExtension */;
 			targetProxy = 28D9F9AA29638D5E0028B96E /* PBXContainerItemProxy */;
+		};
+		B2C3D4E51F60718293A4B5D1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2C3D4E51F60718293A4B5CC /* LocalSendLiveActivityExtension */;
+			targetProxy = B2C3D4E51F60718293A4B5D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -650,6 +737,120 @@
 			};
 			name = Profile;
 		};
+		A1E1A12F60718293A4B5E10 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = LocalSendLiveActivityExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 3W7H4PYMCV;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LocalSendLiveActivity/Info.plist;
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.localsend.localsendApp.LocalSendLiveActivity;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1E1A12F60718293A4B5E11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = LocalSendLiveActivityExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 3W7H4PYMCV;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LocalSendLiveActivity/Info.plist;
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.localsend.localsendApp.LocalSendLiveActivity;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A1E1A12F60718293A4B5E12 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = LocalSendLiveActivityExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 3W7H4PYMCV;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LocalSendLiveActivity/Info.plist;
+				INFOPLIST_PREPROCESS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.localsend.localsendApp.LocalSendLiveActivity;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -835,6 +1036,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1E1A12F60718293A4B5D800 /* Build configuration list for PBXNativeTarget "LocalSendLiveActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1E1A12F60718293A4B5E10 /* Debug */,
+				A1E1A12F60718293A4B5E11 /* Release */,
+				A1E1A12F60718293A4B5E12 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,3 +1,4 @@
+import 'package:localsend_app/util/native/ios_live_activity_sync.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 /// A provider holding the progress of the send process.
@@ -15,6 +16,7 @@ class ProgressNotifier extends ChangeNotifier {
     }
     progressMap[fileId] = progress;
     notifyListeners();
+    scheduleIosLiveActivityProgressSync();
   }
 
   double getProgress({required String sessionId, required String fileId}) {
@@ -24,11 +26,13 @@ class ProgressNotifier extends ChangeNotifier {
   void removeSession(String sessionId) {
     _progressMap.remove(sessionId);
     notifyListeners();
+    scheduleIosLiveActivityProgressSync();
   }
 
   void removeAllSessions() {
     _progressMap.clear();
     notifyListeners();
+    scheduleIosLiveActivityProgressSync();
   }
 
   /// Only for debug purposes

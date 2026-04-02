@@ -1,0 +1,61 @@
+# Git
+.git
+.gitignore
+
+# Flutter build
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Generated
+*.g.dart
+*.freezed.dart
+*.gr.dart
+*.config.dart
+
+# Android
+android/.gradle/
+android/app/build/
+
+# iOS
+ios/Pods/
+ios/Flutter/
+ios/build/
+
+# MacOS
+macos/Pods/
+macos/build/
+
+# Windows
+windows/flutter/ephemeral/
+windows/runner/Debug/
+windows/runner/Release/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Web
+web/build/
+
+# Assets (если много)
+assets/images/
+assets/videos/
+
+# Tests
+test/
+integration_test/
+
+# Docs
+README.md
+CHANGELOG.md
+LICENSE

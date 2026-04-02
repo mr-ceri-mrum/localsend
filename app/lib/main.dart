@@ -8,10 +8,12 @@ import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/pages/first_alias_setup_page.dart';
 import 'package:localsend_app/pages/home_page.dart';
-import 'package:localsend_app/provider/persistence_provider.dart';
 import 'package:localsend_app/provider/local_ip_provider.dart';
+import 'package:localsend_app/provider/persistence_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
 import 'package:localsend_app/util/ui/dynamic_colors.dart';
+import 'package:localsend_app/widget/watcher/ios_transfer_background_watcher.dart';
+import 'package:localsend_app/widget/watcher/ios_transfer_live_activity_watcher.dart';
 import 'package:localsend_app/widget/watcher/life_cycle_watcher.dart';
 import 'package:localsend_app/widget/watcher/shortcut_watcher.dart';
 import 'package:localsend_app/widget/watcher/tray_watcher.dart';
@@ -52,39 +54,43 @@ class LocalSendApp extends StatelessWidget {
     final dynamicColors = ref.watch(dynamicColorsProvider);
     return TrayWatcher(
       child: WindowWatcher(
-        child: LifeCycleWatcher(
-          onChangedState: (AppLifecycleState state) {
-            switch (state) {
-              case AppLifecycleState.resumed:
-                ref.redux(localIpProvider).dispatch(InitLocalIpAction());
-                break;
-              case AppLifecycleState.detached:
-                // The main isolate is only exited when all child isolates are exited.
-                // https://github.com/localsend/localsend/issues/1568
-                ref.redux(parentIsolateProvider).dispatch(IsolateDisposeAction());
-                break;
-              default:
-                break;
-            }
-          },
-          child: ShortcutWatcher(
-            child: MaterialApp(
-              title: t.appName,
-              locale: TranslationProvider.of(context).flutterLocale,
-              supportedLocales: AppLocaleUtils.supportedLocales,
-              localizationsDelegates: GlobalMaterialLocalizations.delegates,
-              debugShowCheckedModeBanner: false,
-              theme: getTheme(colorMode, Brightness.light, dynamicColors),
-              darkTheme: getTheme(colorMode, Brightness.dark, dynamicColors),
-              themeMode: colorMode == ColorMode.oled ? ThemeMode.dark : themeMode,
-              navigatorKey: Routerino.navigatorKey,
-              home: RouterinoHome(
-                builder: () => requiresAliasSetup
-                    ? const FirstAliasSetupPage()
-                    : const HomePage(
-                        initialTab: HomeTab.receive,
-                        appStart: true,
-                      ),
+        child: IosTransferBackgroundWatcher(
+          child: IosTransferLiveActivityWatcher(
+            child: LifeCycleWatcher(
+              onChangedState: (AppLifecycleState state) {
+                switch (state) {
+                  case AppLifecycleState.resumed:
+                    ref.redux(localIpProvider).dispatch(InitLocalIpAction());
+                    break;
+                  case AppLifecycleState.detached:
+                    // The main isolate is only exited when all child isolates are exited.
+                    // https://github.com/localsend/localsend/issues/1568
+                    ref.redux(parentIsolateProvider).dispatch(IsolateDisposeAction());
+                    break;
+                  default:
+                    break;
+                }
+              },
+              child: ShortcutWatcher(
+                child: MaterialApp(
+                  title: t.appName,
+                  locale: TranslationProvider.of(context).flutterLocale,
+                  supportedLocales: AppLocaleUtils.supportedLocales,
+                  localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                  debugShowCheckedModeBanner: false,
+                  theme: getTheme(colorMode, Brightness.light, dynamicColors),
+                  darkTheme: getTheme(colorMode, Brightness.dark, dynamicColors),
+                  themeMode: colorMode == ColorMode.oled ? ThemeMode.dark : themeMode,
+                  navigatorKey: Routerino.navigatorKey,
+                  home: RouterinoHome(
+                    builder: () => requiresAliasSetup
+                        ? const FirstAliasSetupPage()
+                        : const HomePage(
+                            initialTab: HomeTab.receive,
+                            appStart: true,
+                          ),
+                  ),
+                ),
               ),
             ),
           ),

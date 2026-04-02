@@ -16,6 +16,13 @@ analyzer:
     - lib/**.g.dart
     - lib/**.freezed.dart
     - submodules/**
+    # Cargokit’s build_tool is a nested package (run `dart pub get` inside rust_builder/cargokit/build_tool).
+    # Analyzing it from the app root reports missing packages and floods the IDE.
+    - rust_builder/cargokit/**
+    # Xcode/CocoaPods generated intermediates (not application source).
+    - build/**
+    # flutter_rust_bridge generated bindings (UuidValue experimental warnings).
+    - lib/rust/**
 
 formatter:
   trailing_commas: preserve

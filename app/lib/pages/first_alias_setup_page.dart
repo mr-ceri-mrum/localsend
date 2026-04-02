@@ -54,6 +54,7 @@ class _FirstAliasSetupPageState extends State<FirstAliasSetupPage> {
 
     try {
       await context.ref.notifier(settingsProvider).setAlias(alias);
+      if (!mounted) return;
       await context.ref.read(persistenceProvider).setAliasSetupCompleted(true);
       if (!mounted) return;
       await context.pushRoot(
