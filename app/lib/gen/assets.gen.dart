@@ -38,8 +38,11 @@ class $AssetsImgGen {
   /// File path: assets/img/logo.ico
   String get logo => 'assets/img/logo.ico';
 
+  /// File path: assets/img/receive_network_hero.png
+  AssetGenImage get receiveNetworkHero => const AssetGenImage('assets/img/receive_network_hero.png');
+
   /// List of all assets
-  List<dynamic> get values => [logo128, logo256, logo32Black, logo32White, logo32, logo512White, logo512, logo];
+  List<dynamic> get values => [logo128, logo256, logo32Black, logo32White, logo32, logo512White, logo512, logo, receiveNetworkHero];
 }
 
 class $AssetsWebGen {

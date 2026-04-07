@@ -42,6 +42,7 @@ import 'package:localsend_app/util/native/directories.dart';
 import 'package:localsend_app/util/native/file_saver.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/util/native/tray_helper.dart';
+import 'package:localsend_app/util/native/windows_receive_format_conversion.dart';
 import 'package:localsend_app/util/rust.dart';
 import 'package:localsend_app/util/simple_server.dart';
 import 'package:localsend_app/widget/dialogs/open_file_dialog.dart';
@@ -525,6 +526,24 @@ class ReceiveController {
         androidSdkInt: server.ref.read(deviceInfoProvider).androidSdkInt,
         createdDirectories: receiveState.createdDirectories,
       );
+
+      var historyFileName = receivingFile.desiredName!;
+      var historyFileSize = receivingFile.file.size;
+      if (filePath != null && filePath.isNotEmpty && Platform.isWindows) {
+        final converted = await applyWindowsReceiveConversion(
+          savedFilePath: filePath,
+          fileType: fileType,
+          settings: server.ref.read(settingsProvider),
+          destinationDirectory: receiveState.destinationDirectory,
+          createdDirectories: receiveState.createdDirectories,
+        );
+        if (converted != null) {
+          filePath = converted.path;
+          historyFileName = converted.fileName;
+          historyFileSize = converted.fileSize;
+        }
+      }
+
       if (server.getState().session == null || !allowedStates.contains(server.getState().session!.status)) {
         return await request.respondJson(500, message: 'Server is in invalid state');
       }
@@ -546,12 +565,12 @@ class ReceiveController {
           .dispatchAsync(
             AddHistoryEntryAction(
               entryId: fileId,
-              fileName: receivingFile.desiredName!,
+              fileName: historyFileName,
               fileType: receivingFile.file.fileType,
               path: filePath,
               savedToGallery: savedToGallery,
               isMessage: false,
-              fileSize: receivingFile.file.size,
+              fileSize: historyFileSize,
               senderAlias: receiveState.senderAlias,
               timestamp: DateTime.now().toUtc(),
             ),

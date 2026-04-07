@@ -67,6 +67,7 @@ extension FilePathStringExt on String {
         return FileType.image;
       case 'mp4':
       case 'mov':
+      case 'm4v':
         return FileType.video;
       case 'pdf':
         return FileType.pdf;

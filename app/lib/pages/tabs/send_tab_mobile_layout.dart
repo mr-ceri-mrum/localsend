@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/util/native/file_picker.dart';
 
 /// Dark “Share”-style shell used for the mobile send tab (matches compact grid + banner layout).
 ThemeData sendTabMobileTheme() {
-  const accent = Color(0xFF88A4FF);
-  const bg = Color(0xFF0D0D0D);
-  const surface = Color(0xFF1A1A1A);
+  const accent = IosStyle.accent;
+  const bg = IosStyle.background;
+  const surface = IosStyle.card;
   return ThemeData(
     brightness: Brightness.dark,
     useMaterial3: true,
@@ -18,7 +19,7 @@ ThemeData sendTabMobileTheme() {
       secondary: accent,
       onSecondary: Colors.white,
       surface: surface,
-      onSurface: Color(0xFFE8E8E8),
+      onSurface: IosStyle.text,
       surfaceContainerHighest: Color(0xFF242424),
     ),
     inputDecorationTheme: const InputDecorationTheme(
@@ -33,12 +34,12 @@ class SendTabMobileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color(0xFF88A4FF);
+    const accent = IosStyle.accent;
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 20),
       child: Row(
         children: [
-          _WindowsMark(color: accent),
+          iosWindowsMark(color: accent),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -46,45 +47,10 @@ class SendTabMobileHeader extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFE8E8E8),
+                color: IosStyle.text,
                 letterSpacing: 0.2,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WindowsMark extends StatelessWidget {
-  final Color color;
-
-  const _WindowsMark({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    Widget cell() => Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(1.5),
-          ),
-        );
-    return SizedBox(
-      width: 18,
-      height: 18,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [cell(), cell()],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [cell(), cell()],
           ),
         ],
       ),
@@ -168,10 +134,10 @@ class SendTabMobileSelectionGrid extends StatelessWidget {
         final option = options[index];
         final tint = _tint(option);
         return Material(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(16),
+          color: IosStyle.card,
+          borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
             onTap: () => onOptionTap(option),
             child: Padding(
               padding: const EdgeInsets.all(14),
@@ -193,7 +159,7 @@ class SendTabMobileSelectionGrid extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Color(0xFFE8E8E8),
+                      color: IosStyle.text,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -233,9 +199,9 @@ class SendTabMobileWifiBanner extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2A2A2A)),
+          color: IosStyle.card,
+          borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
+          border: Border.all(color: IosStyle.cardBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

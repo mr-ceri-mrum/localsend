@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 
 class CustomBackButton extends StatelessWidget {
@@ -71,5 +72,9 @@ PreferredSizeWidget basicLocalSendAppbar(String title) {
             ),
           ),
         )
-      : AppBar(title: Text(title));
+      : AppBar(
+          title: Text(title),
+          backgroundColor: IosStyle.cardDeep,
+          foregroundColor: IosStyle.text,
+        );
 }

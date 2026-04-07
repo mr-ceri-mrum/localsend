@@ -24,7 +24,7 @@
   <Identity Name="11157TienDoNam.LocalSend" Version="1.14.0.0"
             Publisher="CN=Tien Do Nam, O=Tien Do Nam, S=Sachsen, C=DE" ProcessorArchitecture="x64" />
   <Properties>
-    <DisplayName>LocalSend MSIX Helper</DisplayName>
+    <DisplayName>WinDrop MSIX Helper</DisplayName>
     <PublisherDisplayName>Tien Do Nam</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
     <Description>An open source cross-platform alternative to AirDrop</Description>

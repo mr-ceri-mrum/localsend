@@ -11,12 +11,14 @@ import 'package:flutter/material.dart' as _i8;
 import 'package:localsend_app/gen/strings.g.dart' as _i10;
 import 'package:localsend_app/model/persistence/color_mode.dart' as _i9;
 import 'package:localsend_app/model/persistence/favorite_device.dart' as _i6;
-import 'package:localsend_app/model/persistence/receive_history_entry.dart' as _i5;
+import 'package:localsend_app/model/persistence/receive_history_entry.dart'
+    as _i5;
 import 'package:localsend_app/model/send_mode.dart' as _i11;
+import 'package:localsend_app/model/windows_video_conversion_mode.dart' as _i13;
 import 'package:localsend_app/provider/persistence_provider.dart' as _i3;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
-import 'package:shared_preferences/shared_preferences.dart' as _i13;
+import 'package:shared_preferences/shared_preferences.dart' as _i14;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -31,15 +33,19 @@ import 'package:shared_preferences/shared_preferences.dart' as _i13;
 // ignore_for_file: unnecessary_parenthesis
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: invalid_use_of_internal_member
 
-class _FakeStoredSecurityContext_0 extends _i1.SmartFake implements _i2.StoredSecurityContext {
-  _FakeStoredSecurityContext_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+class _FakeStoredSecurityContext_0 extends _i1.SmartFake
+    implements _i2.StoredSecurityContext {
+  _FakeStoredSecurityContext_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [PersistenceService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockPersistenceService extends _i1.Mock implements _i3.PersistenceService {
+class MockPersistenceService extends _i1.Mock
+    implements _i3.PersistenceService {
   @override
   bool get isFirstAppStart =>
       (super.noSuchMethod(
@@ -170,6 +176,24 @@ class MockPersistenceService extends _i1.Mock implements _i3.PersistenceService 
   _i4.Future<void> setAlias(String? alias) =>
       (super.noSuchMethod(
             Invocation.method(#setAlias, [alias]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  bool isAliasSetupCompleted() =>
+      (super.noSuchMethod(
+            Invocation.method(#isAliasSetupCompleted, []),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i4.Future<void> setAliasSetupCompleted(bool? completed) =>
+      (super.noSuchMethod(
+            Invocation.method(#setAliasSetupCompleted, [completed]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
@@ -598,12 +622,59 @@ class MockPersistenceService extends _i1.Mock implements _i3.PersistenceService 
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
           as _i4.Future<void>);
+
+  @override
+  bool getConvertHeicOnReceive() =>
+      (super.noSuchMethod(
+            Invocation.method(#getConvertHeicOnReceive, []),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i4.Future<void> setConvertHeicOnReceive(bool? value) =>
+      (super.noSuchMethod(
+            Invocation.method(#setConvertHeicOnReceive, [value]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i13.WindowsVideoConversionMode getWindowsVideoConversionMode() =>
+      (super.noSuchMethod(
+            Invocation.method(#getWindowsVideoConversionMode, []),
+            returnValue: _i13.WindowsVideoConversionMode.original,
+            returnValueForMissingStub: _i13.WindowsVideoConversionMode.original,
+          )
+          as _i13.WindowsVideoConversionMode);
+
+  @override
+  _i4.Future<void> setWindowsVideoConversionMode(
+    _i13.WindowsVideoConversionMode? mode,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#setWindowsVideoConversionMode, [mode]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> setFfmpegCustomPath(String? path) =>
+      (super.noSuchMethod(
+            Invocation.method(#setFfmpegCustomPath, [path]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
 }
 
 /// A class which mocks [SharedPreferences].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSharedPreferences extends _i1.Mock implements _i13.SharedPreferences {
+class MockSharedPreferences extends _i1.Mock implements _i14.SharedPreferences {
   @override
   Set<String> getKeys() =>
       (super.noSuchMethod(

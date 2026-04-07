@@ -57,7 +57,7 @@ Future<bool> isContextMenuEnabled() async {
   }
 }
 
-const _windowsFileName = 'Share to windows';
+const _windowsFileName = 'WinDrop';
 
 String _getWindowsFilePath(String appName) {
   final appData = Platform.environment['APPDATA'];

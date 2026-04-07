@@ -1,16 +1,22 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/gen/strings.g.dart';
+import 'package:localsend_app/model/windows_video_conversion_mode.dart';
 import 'package:localsend_app/pages/language_page.dart';
 import 'package:localsend_app/pages/tabs/settings_tab_vm.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/dialogs/pin_dialog.dart';
+import 'package:path/path.dart' as p;
 import 'package:refena_flutter/refena_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Dark settings shell (matches Send tab / mockup).
 ThemeData settingsTabMobileTheme() {
-  const accent = Color(0xFF6B9FFF);
-  const bg = Color(0xFF0A0A0A);
-  const surface = Color(0xFF161616);
+  const accent = IosStyle.accentAlt;
+  const bg = IosStyle.background;
+  const surface = IosStyle.card;
   return ThemeData(
     brightness: Brightness.dark,
     useMaterial3: true,
@@ -22,7 +28,7 @@ ThemeData settingsTabMobileTheme() {
       secondary: accent,
       onSecondary: Colors.white,
       surface: surface,
-      onSurface: Color(0xFFE8E8E8),
+      onSurface: IosStyle.text,
       surfaceContainerHighest: Color(0xFF242424),
       outline: Color(0xFF4A4A4A),
     ),
@@ -124,6 +130,105 @@ class SettingsTabMobileView extends StatelessWidget {
                   ),
                 ],
               ),
+              if (checkPlatform([TargetPlatform.windows])) ...[
+                const SizedBox(height: 20),
+                _sectionLabel(t.settingsTab.receive.windowsIosCompat.title),
+                _SettingsCard(
+                  children: [
+                    _ToggleRow(
+                      icon: Icons.photo_outlined,
+                      iconBg: const Color(0xFF00897B),
+                      label: t.settingsTab.receive.windowsIosCompat.convertHeic,
+                      value: vm.settings.convertHeicOnReceive,
+                      onChanged: (b) async {
+                        await ref.notifier(settingsProvider).setConvertHeicOnReceive(b);
+                      },
+                    ),
+                    _divider,
+                    _NavRow(
+                      icon: Icons.video_file_rounded,
+                      iconBg: const Color(0xFF5C6BC0),
+                      label: t.settingsTab.receive.windowsIosCompat.videoMode,
+                      value: _windowsVideoModeLabel(vm.settings.windowsVideoConversionMode),
+                      onTap: () async {
+                        await _openWindowsVideoModeDialog(context, ref);
+                      },
+                    ),
+                    _divider,
+                    _NavRow(
+                      icon: Icons.terminal_rounded,
+                      iconBg: const Color(0xFF6D4C41),
+                      label: t.settingsTab.receive.windowsIosCompat.ffmpegPath,
+                      value: vm.settings.ffmpegCustomPath != null && vm.settings.ffmpegCustomPath!.isNotEmpty
+                          ? p.basename(vm.settings.ffmpegCustomPath!)
+                          : t.settingsTab.receive.windowsIosCompat.ffmpegPathHint,
+                      onTap: () async {
+                        final file = await openFile(
+                          acceptedTypeGroups: [
+                            const XTypeGroup(
+                              label: 'Executable',
+                              extensions: ['exe'],
+                            ),
+                          ],
+                        );
+                        if (file != null && context.mounted) {
+                          await ref.notifier(settingsProvider).setFfmpegCustomPath(file.path);
+                        }
+                      },
+                    ),
+                    if (vm.settings.ffmpegCustomPath != null && vm.settings.ffmpegCustomPath!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 14, right: 14, bottom: 8),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () async {
+                              await ref.notifier(settingsProvider).setFfmpegCustomPath(null);
+                            },
+                            child: Text(t.settingsTab.receive.windowsIosCompat.clearFfmpeg),
+                          ),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            t.settingsTab.receive.windowsIosCompat.codecHintsTitle,
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          ),
+                          const SizedBox(height: 6),
+                          TextButton(
+                            onPressed: () async {
+                              final uri = Uri.parse('https://www.microsoft.com/store/productId/9PMMSR1CGPWG');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(t.settingsTab.receive.windowsIosCompat.heifExtension),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              final uri = Uri.parse('https://www.microsoft.com/store/productId/9NMZZHZBNR3T');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(t.settingsTab.receive.windowsIosCompat.hevcExtension),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 24),
               _RestartServerButton(vm: vm),
               const SizedBox(height: 40),
@@ -132,6 +237,43 @@ class SettingsTabMobileView extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+String _windowsVideoModeLabel(WindowsVideoConversionMode mode) {
+  switch (mode) {
+    case WindowsVideoConversionMode.original:
+      return t.settingsTab.receive.windowsIosCompat.videoModeOriginal;
+    case WindowsVideoConversionMode.remuxMp4:
+      return t.settingsTab.receive.windowsIosCompat.videoModeRemux;
+    case WindowsVideoConversionMode.transcodeH264:
+      return t.settingsTab.receive.windowsIosCompat.videoModeTranscode;
+  }
+}
+
+Future<void> _openWindowsVideoModeDialog(BuildContext context, Ref ref) async {
+  final picked = await showDialog<WindowsVideoConversionMode>(
+    context: context,
+    builder: (ctx) {
+      return SimpleDialog(
+        title: Text(t.settingsTab.receive.windowsIosCompat.videoMode),
+        children: [
+          for (final mode in WindowsVideoConversionMode.values)
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(ctx, mode);
+              },
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(_windowsVideoModeLabel(mode)),
+              ),
+            ),
+        ],
+      );
+    },
+  );
+  if (picked != null) {
+    await ref.notifier(settingsProvider).setWindowsVideoConversionMode(picked);
   }
 }
 
@@ -184,10 +326,10 @@ class _RestartServerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final running = vm.serverState != null;
-    const accent = Color(0xFF6B9FFF);
+    const accent = IosStyle.accentAlt;
 
     return Material(
-      color: const Color(0xFF1A1A1A),
+      color: IosStyle.card,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -234,10 +376,10 @@ class _MobileSettingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const accent = Color(0xFF6B9FFF);
+    const accent = IosStyle.accentAlt;
     return Row(
       children: [
-        const _WindowsMark(color: accent),
+        iosWindowsMark(color: accent),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -245,47 +387,12 @@ class _MobileSettingsHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF6B9FFF),
+              color: IosStyle.accentAlt,
               letterSpacing: 0.2,
             ),
           ),
         ),
       ],
-    );
-  }
-}
-
-class _WindowsMark extends StatelessWidget {
-  final Color color;
-
-  const _WindowsMark({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    Widget cell() => Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(1.5),
-          ),
-        );
-    return SizedBox(
-      width: 18,
-      height: 18,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [cell(), cell()],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [cell(), cell()],
-          ),
-        ],
-      ),
     );
   }
 }
@@ -316,9 +423,9 @@ class _SettingsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF161616),
+        color: IosStyle.card,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF242424)),
+        border: Border.all(color: IosStyle.cardBorder),
       ),
       child: Column(children: children),
     );
@@ -350,27 +457,39 @@ class _NavRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _IconCircle(bg: iconBg, icon: icon),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFFE8E8E8),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFFE8E8E8),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade500,
+                      ),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade500,
-                ),
+              Padding(
+                padding: const EdgeInsets.only(top: 2, left: 4),
+                child: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade600, size: 22),
               ),
-              Icon(Icons.chevron_right_rounded, color: Colors.grey.shade600, size: 22),
             ],
           ),
         ),

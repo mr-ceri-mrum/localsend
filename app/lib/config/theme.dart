@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
@@ -55,6 +56,12 @@ ThemeData getTheme(ColorMode colorMode, Brightness brightness, DynamicColors? dy
   return ThemeData(
     colorScheme: colorScheme,
     useMaterial3: true,
+    scaffoldBackgroundColor: brightness == Brightness.dark ? IosStyle.background : null,
+    cardTheme: CardThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(IosStyle.radiusLarge)),
+      margin: EdgeInsets.zero,
+      color: brightness == Brightness.dark ? IosStyle.card : null,
+    ),
     navigationBarTheme: colorScheme.brightness == Brightness.dark
         ? NavigationBarThemeData(
             iconTheme: WidgetStateProperty.all(const IconThemeData(color: Colors.white)),
@@ -78,6 +85,10 @@ ThemeData getTheme(ColorMode colorMode, Brightness brightness, DynamicColors? dy
       style: TextButton.styleFrom(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8 + desktopPaddingFix),
       ),
+    ),
+    navigationRailTheme: NavigationRailThemeData(
+      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(IosStyle.radiusMedium)),
+      backgroundColor: brightness == Brightness.dark ? IosStyle.cardDeep : null,
     ),
     fontFamily: fontFamily,
   );

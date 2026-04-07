@@ -2,6 +2,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 // ignore_for_file: type=lint
+// ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: unused_element, unnecessary_cast, override_on_non_overriding_member
 // ignore_for_file: strict_raw_type, inference_failure_on_untyped_parameter
 
@@ -15,6 +16,7 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     if (_instance == null) {
       MapperContainer.globals.use(_instance = SettingsStateMapper._());
       DeviceTypeMapper.ensureInitialized();
+      WindowsVideoConversionModeMapper.ensureInitialized();
     }
     return _instance!;
   }
@@ -147,6 +149,24 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     'advancedSettings',
     _$advancedSettings,
   );
+  static bool _$convertHeicOnReceive(SettingsState v) => v.convertHeicOnReceive;
+  static const Field<SettingsState, bool> _f$convertHeicOnReceive = Field(
+    'convertHeicOnReceive',
+    _$convertHeicOnReceive,
+  );
+  static WindowsVideoConversionMode _$windowsVideoConversionMode(
+    SettingsState v,
+  ) => v.windowsVideoConversionMode;
+  static const Field<SettingsState, WindowsVideoConversionMode>
+  _f$windowsVideoConversionMode = Field(
+    'windowsVideoConversionMode',
+    _$windowsVideoConversionMode,
+  );
+  static String? _$ffmpegCustomPath(SettingsState v) => v.ffmpegCustomPath;
+  static const Field<SettingsState, String> _f$ffmpegCustomPath = Field(
+    'ffmpegCustomPath',
+    _$ffmpegCustomPath,
+  );
 
   @override
   final MappableFields<SettingsState> fields = const {
@@ -176,6 +196,9 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     #shareViaLinkAutoAccept: _f$shareViaLinkAutoAccept,
     #discoveryTimeout: _f$discoveryTimeout,
     #advancedSettings: _f$advancedSettings,
+    #convertHeicOnReceive: _f$convertHeicOnReceive,
+    #windowsVideoConversionMode: _f$windowsVideoConversionMode,
+    #ffmpegCustomPath: _f$ffmpegCustomPath,
   };
 
   static SettingsState _instantiate(DecodingData data) {
@@ -206,6 +229,9 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
       shareViaLinkAutoAccept: data.dec(_f$shareViaLinkAutoAccept),
       discoveryTimeout: data.dec(_f$discoveryTimeout),
       advancedSettings: data.dec(_f$advancedSettings),
+      convertHeicOnReceive: data.dec(_f$convertHeicOnReceive),
+      windowsVideoConversionMode: data.dec(_f$windowsVideoConversionMode),
+      ffmpegCustomPath: data.dec(_f$ffmpegCustomPath),
     );
   }
 
@@ -302,6 +328,9 @@ abstract class SettingsStateCopyWith<$R, $In extends SettingsState, $Out>
     bool? shareViaLinkAutoAccept,
     int? discoveryTimeout,
     bool? advancedSettings,
+    bool? convertHeicOnReceive,
+    WindowsVideoConversionMode? windowsVideoConversionMode,
+    String? ffmpegCustomPath,
   });
   SettingsStateCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
@@ -360,6 +389,9 @@ class _SettingsStateCopyWithImpl<$R, $Out>
     bool? shareViaLinkAutoAccept,
     int? discoveryTimeout,
     bool? advancedSettings,
+    bool? convertHeicOnReceive,
+    WindowsVideoConversionMode? windowsVideoConversionMode,
+    Object? ffmpegCustomPath = $none,
   }) => $apply(
     FieldCopyWithData({
       if (showToken != null) #showToken: showToken,
@@ -391,6 +423,11 @@ class _SettingsStateCopyWithImpl<$R, $Out>
         #shareViaLinkAutoAccept: shareViaLinkAutoAccept,
       if (discoveryTimeout != null) #discoveryTimeout: discoveryTimeout,
       if (advancedSettings != null) #advancedSettings: advancedSettings,
+      if (convertHeicOnReceive != null)
+        #convertHeicOnReceive: convertHeicOnReceive,
+      if (windowsVideoConversionMode != null)
+        #windowsVideoConversionMode: windowsVideoConversionMode,
+      if (ffmpegCustomPath != $none) #ffmpegCustomPath: ffmpegCustomPath,
     }),
   );
   @override
@@ -430,6 +467,15 @@ class _SettingsStateCopyWithImpl<$R, $Out>
     ),
     discoveryTimeout: data.get(#discoveryTimeout, or: $value.discoveryTimeout),
     advancedSettings: data.get(#advancedSettings, or: $value.advancedSettings),
+    convertHeicOnReceive: data.get(
+      #convertHeicOnReceive,
+      or: $value.convertHeicOnReceive,
+    ),
+    windowsVideoConversionMode: data.get(
+      #windowsVideoConversionMode,
+      or: $value.windowsVideoConversionMode,
+    ),
+    ffmpegCustomPath: data.get(#ffmpegCustomPath, or: $value.ffmpegCustomPath),
   );
 
   @override

@@ -1,10 +1,8 @@
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/init.dart';
-import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/pages/home_page_controller.dart';
 import 'package:localsend_app/pages/tabs/receive_tab.dart';
@@ -12,8 +10,6 @@ import 'package:localsend_app/pages/tabs/send_tab.dart';
 import 'package:localsend_app/pages/tabs/settings_tab.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/util/native/cross_file_converters.dart';
-import 'package:localsend_app/util/native/platform_check.dart';
-import 'package:localsend_app/widget/responsive_builder.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 enum HomeTab {
@@ -100,99 +96,45 @@ class _HomePageState extends State<HomePage> with Refena {
         }
         vm.changeTab(HomeTab.send);
       },
-      child: ResponsiveBuilder(
-        builder: (sizingInformation) {
-          return Scaffold(
-            body: Row(
-              children: [
-                if (!sizingInformation.isMobile)
-                  Stack(
-                    children: [
-                      NavigationRail(
-                        selectedIndex: vm.currentTab.index,
-                        onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
-                        extended: sizingInformation.isDesktop,
-                        backgroundColor: Theme.of(context).cardColorWithElevation,
-                        leading: sizingInformation.isDesktop
-                            ? Column(
-                                children: [
-                                  checkPlatform([TargetPlatform.macOS])
-                                      ? // considered adding some extra space so it looks more natural
-                                        SizedBox(height: 40)
-                                      : SizedBox(height: 20),
-                                  const Text(
-                                    'LocalSend',
-                                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  SizedBox(height: 20),
-                                ],
-                              )
-                            : checkPlatform([TargetPlatform.macOS])
-                            ? SizedBox(
-                                height: 20,
-                              )
-                            : null,
-                        destinations: HomeTab.values.map((tab) {
-                          return NavigationRailDestination(
-                            icon: Icon(tab.icon),
-                            label: Text(tab.label),
-                          );
-                        }).toList(),
-                      ),
-                      // makes the top draggable
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 40,
-                        child: MoveWindow(),
-                      ),
-                    ],
-                  ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      PageView(
-                        controller: vm.controller,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: const [
-                          SafeArea(child: ReceiveTab()),
-                          SafeArea(child: SendTab()),
-                          SettingsTab(),
-                        ],
-                      ),
-                      if (_dragAndDropIndicator)
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.file_download, size: 128),
-                              const SizedBox(height: 30),
-                              Text(t.sendTab.placeItems, style: Theme.of(context).textTheme.titleLarge),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: PageView(
+                controller: vm.controller,
+                physics: const NeverScrollableScrollPhysics(),
+                children: const [
+                  SafeArea(child: ReceiveTab()),
+                  SafeArea(child: SendTab()),
+                  SettingsTab(),
+                ],
+              ),
             ),
-            bottomNavigationBar: sizingInformation.isMobile
-                ? NavigationBar(
-                    selectedIndex: vm.currentTab.index,
-                    onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
-                    destinations: HomeTab.values.map((tab) {
-                      return NavigationDestination(icon: Icon(tab.icon), label: tab.label);
-                    }).toList(),
-                  )
-                : null,
-          );
-        },
+            if (_dragAndDropIndicator)
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.file_download, size: 128),
+                    const SizedBox(height: 30),
+                    Text(t.sendTab.placeItems, style: Theme.of(context).textTheme.titleLarge),
+                  ],
+                ),
+              ),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: vm.currentTab.index,
+          onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
+          destinations: HomeTab.values.map((tab) {
+            return NavigationDestination(icon: Icon(tab.icon), label: tab.label);
+          }).toList(),
+        ),
       ),
     );
   }

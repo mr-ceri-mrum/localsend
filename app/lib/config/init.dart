@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:localsend_app/config/refena.dart';
 import 'package:localsend_app/config/theme.dart';
+import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/pages/home_page.dart';
 import 'package:localsend_app/pages/home_page_controller.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
@@ -122,6 +123,11 @@ Future<RefenaContainer> preInit(List<String> args) async {
     // initialize size and position
     await WindowManager.instance.ensureInitialized();
     await WindowDimensionsController(persistenceService).initDimensionsConfiguration();
+    // Ensures title matches i18n (native runner title may be stale until full rebuild).
+    if (defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.linux) {
+      await windowManager.setTitle(t.appName);
+    }
     if (args.contains(startHiddenFlag)) {
       // keep this app hidden
       startHidden = true;

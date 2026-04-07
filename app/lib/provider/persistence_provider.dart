@@ -12,6 +12,7 @@ import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/model/persistence/favorite_device.dart';
 import 'package:localsend_app/model/persistence/receive_history_entry.dart';
 import 'package:localsend_app/model/send_mode.dart';
+import 'package:localsend_app/model/windows_video_conversion_mode.dart';
 import 'package:localsend_app/provider/window_dimensions_provider.dart';
 import 'package:localsend_app/util/alias_generator.dart';
 import 'package:localsend_app/util/native/autostart_helper.dart';
@@ -32,6 +33,12 @@ part 'persistence_provider_migrations.dart';
 final _logger = Logger('PersistenceService');
 
 String get _windowsFile {
+  final appData = Platform.environment['APPDATA'];
+  return '$appData\\WinDrop\\settings.json';
+}
+
+/// Previous branding folder (`LocalSend`); migrated on startup when present.
+String get _windowsFileLegacyBranding {
   final appData = Platform.environment['APPDATA'];
   return '$appData\\LocalSend\\settings.json';
 }
@@ -91,6 +98,9 @@ const _deviceType = 'ls_device_type';
 const _deviceModel = 'ls_device_model';
 const _shareViaLinkAutoAccept = 'ls_share_via_link_auto_accept';
 const _advancedSettingsKey = 'ls_advanced_settings';
+const _windowsConvertHeic = 'ls_windows_convert_heic';
+const _windowsVideoConversionMode = 'ls_windows_video_conversion_mode';
+const _windowsFfmpegCustomPath = 'ls_windows_ffmpeg_custom_path';
 
 final persistenceProvider = Provider<PersistenceService>((ref) {
   throw Exception('persistenceProvider not initialized');
@@ -120,6 +130,12 @@ class PersistenceService {
         SharedPreferencesStorePlatform.instance = legacyStore;
         usingLegacyStore = true;
       } else {
+        final newFile = File(_windowsFile);
+        final legacyBrandingFile = File(_windowsFileLegacyBranding);
+        if (!newFile.existsSync() && legacyBrandingFile.existsSync()) {
+          newFile.parent.createSync(recursive: true);
+          legacyBrandingFile.copySync(newFile.path);
+        }
         SharedPreferencesStorePlatform.instance = SharedPreferencesFile(filePath: _windowsFile);
       }
     }
@@ -564,5 +580,41 @@ class PersistenceService {
 
   Future<void> clear() async {
     await _prefs.clear();
+  }
+
+  bool getConvertHeicOnReceive() {
+    return _prefs.getBool(_windowsConvertHeic) ?? true;
+  }
+
+  Future<void> setConvertHeicOnReceive(bool value) async {
+    await _prefs.setBool(_windowsConvertHeic, value);
+  }
+
+  WindowsVideoConversionMode getWindowsVideoConversionMode() {
+    final raw = _prefs.getString(_windowsVideoConversionMode);
+    if (raw == null) {
+      // Default: H.264/AAC so iPhone MOV/HEVC plays on Windows without extra codecs (FFmpeg is bundled).
+      return WindowsVideoConversionMode.transcodeH264;
+    }
+    return WindowsVideoConversionMode.values.firstWhere(
+      (m) => m.name == raw,
+      orElse: () => WindowsVideoConversionMode.transcodeH264,
+    );
+  }
+
+  Future<void> setWindowsVideoConversionMode(WindowsVideoConversionMode mode) async {
+    await _prefs.setString(_windowsVideoConversionMode, mode.name);
+  }
+
+  String? getFfmpegCustomPath() {
+    return _prefs.getString(_windowsFfmpegCustomPath);
+  }
+
+  Future<void> setFfmpegCustomPath(String? path) async {
+    if (path == null || path.isEmpty) {
+      await _prefs.remove(_windowsFfmpegCustomPath);
+    } else {
+      await _prefs.setString(_windowsFfmpegCustomPath, path);
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/config/theme.dart';
 
 class CustomListTile extends StatelessWidget {
@@ -23,12 +24,12 @@ class CustomListTile extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(IosStyle.radiusLarge),
       ),
       color: Theme.of(context).colorScheme.secondaryContainerIfDark,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(IosStyle.radiusLarge),
         child: Padding(
           padding: padding,
           child: Row(

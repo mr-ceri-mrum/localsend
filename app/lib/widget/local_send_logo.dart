@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:localsend_app/gen/assets.gen.dart';
+import 'package:localsend_app/gen/strings.g.dart';
 
 class LocalSendLogo extends StatelessWidget {
   final bool withText;
 
-  const LocalSendLogo({required this.withText});
+  // ignore: prefer_const_constructors_in_immutables -- uses runtime t.appName when withText is true
+  LocalSendLogo({required this.withText});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +25,8 @@ class LocalSendLogo extends StatelessWidget {
       return Column(
         children: [
           logo,
-          const Text(
-            'LocalSend',
+          Text(
+            t.appName,
             style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),

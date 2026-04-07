@@ -1,6 +1,6 @@
 {
   "locale": "English",
-  "appName": "Share to windows",
+  "appName": "WinDrop",
   "general": {
     "accept": "Accept",
     "accepted": "Accepted",
@@ -109,7 +109,7 @@
       "minimizeToTray": "Minimize to the System Tray/Menu Bar when closing",
       "launchAtStartup": "Autostart after login",
       "launchMinimized": "Autostart: Start hidden",
-      "showInContextMenu": "Show LocalSend in context menu",
+      "showInContextMenu": "Show WinDrop in context menu",
       "animations": "Animations"
     },
     "receive": {
@@ -121,7 +121,22 @@
       "destination": "Save to folder",
       "downloads": "(Downloads)",
       "saveToGallery": "Save media to gallery",
-      "saveToHistory": "Save to history"
+      "saveToHistory": "Save to history",
+      "windowsIosCompat": {
+        "title": "iOS media on Windows",
+        "convertHeic": "Convert HEIC/HEIF photos to PNG when receiving",
+        "videoMode": "Video handling",
+        "videoModeOriginal": "Keep original file",
+        "videoModeRemux": "Remux to MP4 (copy streams, no re-encoding)",
+        "videoModeTranscode": "Transcode to H.264/AAC (best compatibility; may reduce quality)",
+        "ffmpegPath": "FFmpeg path (optional)",
+        "ffmpegPathHint": "Bundled next to the app on Windows; override only if needed",
+        "browseFfmpeg": "Choose ffmpeg.exe",
+        "clearFfmpeg": "Clear",
+        "codecHintsTitle": "Optional: Microsoft codecs to preview originals without conversion",
+        "heifExtension": "HEIF Image Extensions (Store)",
+        "hevcExtension": "HEVC Video Extensions (Store)"
+      }
     },
     "send": {
       "title": "Send",
@@ -150,7 +165,7 @@
     },
     "other": {
       "title": "Other",
-      "support": "Support LocalSend",
+      "support": "Support WinDrop",
       "donate": "Donate",
       "privacyPolicy": "Privacy Policy",
       "termsOfUse": "Terms of Use"
@@ -187,7 +202,7 @@
   },
   "networkInterfacesPage": {
     "title": "Network Interfaces",
-    "info": "By default, LocalSend uses all available network interfaces. You can exclude unwanted networks here. You need to restart the server to apply the changes.",
+    "info": "By default, WinDrop uses all available network interfaces. You can exclude unwanted networks here. You need to restart the server to apply the changes.",
     "preview": "Preview",
     "whitelist": "Whitelist",
     "blacklist": "Blacklist"
@@ -225,7 +240,7 @@
   "receiveOptionsPage": {
     "title": "Options",
     "destination": "@:settingsTab.receive.destination",
-    "appDirectory": "(LocalSend folder)",
+    "appDirectory": "(WinDrop folder)",
     "saveToGallery": "@:settingsTab.receive.saveToGallery",
     "saveToGalleryOff": "Turned off automatically because there are folders."
   },
@@ -274,13 +289,13 @@
     "autoAccept": "Automatically accept requests",
     "requirePin": "Require PIN",
     "pinHint": "The PIN is \"{pin}\"",
-    "encryptionHint": "LocalSend uses a self-signed certificate. You need to accept it in your browser.",
+    "encryptionHint": "WinDrop uses a self-signed certificate. You need to accept it in your browser.",
     "pendingRequests": "Pending requests: {n}"
   },
   "aboutPage": {
-    "title": "About LocalSend",
+    "title": "About WinDrop",
     "description": [
-      "LocalSend is a free, open-source app that allows you to securely share files and messages with nearby devices over your local network without needing an internet connection.",
+      "WinDrop is a free, open-source app that allows you to securely share files and messages with nearby devices over your local network without needing an internet connection.",
       "This app is available on Android, iOS, macOS, Windows and Linux. You can find all download options on the official homepage."
     ],
     "author": "Author",
@@ -290,7 +305,7 @@
   },
   "donationPage": {
     "title": "Donate",
-    "info": "LocalSend is free, open-source and without any ads. If you like the app, you can support the development with a donation.",
+    "info": "WinDrop is free, open-source and without any ads. If you like the app, you can support the development with a donation.",
     "donate": "Donate {amount}",
     "thanks": "Thank you very much!",
     "restore": "Restore purchase"
@@ -436,7 +451,7 @@
     },
     "localNetworkUnauthorized": {
       "title": "@:dialogs.noPermission.title",
-      "description": "LocalSend can't find other devices without having the permission to scan the local network. Please grant this permission in the settings.",
+      "description": "WinDrop can't find other devices without having the permission to scan the local network. Please grant this permission in the settings.",
       "gotoSettings": "Settings"
     },
     "messageInput": {
@@ -485,7 +500,7 @@
       "title": "Send modes",
       "single": "Sends files to one recipient. Selection will be cleared after finished files transfer.",
       "multiple": "Sends files to multiple recipients. Selection will not be cleared after finished files transfer.",
-      "link": "Recipients who do not have LocalSend installed can download the selected files by opening the link in their browser."
+      "link": "Recipients who do not have WinDrop installed can download the selected files by opening the link in their browser."
     },
     "zoom": {
       "title": "URL"
@@ -498,7 +513,7 @@
   "tray": {
     "@info": "Apple Guidelines are very strict about the \"close\" wording.",
     "open": "@:general.open",
-    "close": "Quit LocalSend",
+    "close": "Quit WinDrop",
     "closeWindows": "Exit"
   },
   "web": {

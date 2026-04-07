@@ -6,6 +6,7 @@ import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/model/state/settings_state.dart';
+import 'package:localsend_app/model/windows_video_conversion_mode.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
@@ -70,6 +71,9 @@ class SettingsService extends PureNotifier<SettingsState> {
     shareViaLinkAutoAccept: _persistence.getShareViaLinkAutoAccept(),
     discoveryTimeout: _persistence.getDiscoveryTimeout(),
     advancedSettings: _persistence.getAdvancedSettingsEnabled(),
+    convertHeicOnReceive: _persistence.getConvertHeicOnReceive(),
+    windowsVideoConversionMode: _persistence.getWindowsVideoConversionMode(),
+    ffmpegCustomPath: _persistence.getFfmpegCustomPath(),
   );
 
   Future<void> setAlias(String alias) async {
@@ -246,5 +250,20 @@ class SettingsService extends PureNotifier<SettingsState> {
     state = state.copyWith(
       shareViaLinkAutoAccept: shareViaLinkAutoAccept,
     );
+  }
+
+  Future<void> setConvertHeicOnReceive(bool value) async {
+    await _persistence.setConvertHeicOnReceive(value);
+    state = state.copyWith(convertHeicOnReceive: value);
+  }
+
+  Future<void> setWindowsVideoConversionMode(WindowsVideoConversionMode mode) async {
+    await _persistence.setWindowsVideoConversionMode(mode);
+    state = state.copyWith(windowsVideoConversionMode: mode);
+  }
+
+  Future<void> setFfmpegCustomPath(String? path) async {
+    await _persistence.setFfmpegCustomPath(path);
+    state = state.copyWith(ffmpegCustomPath: path);
   }
 }

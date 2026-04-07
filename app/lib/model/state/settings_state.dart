@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/persistence/color_mode.dart';
 import 'package:localsend_app/model/send_mode.dart';
+import 'package:localsend_app/model/windows_video_conversion_mode.dart';
 
 part 'settings_state.mapper.dart';
 
@@ -36,6 +37,15 @@ class SettingsState with SettingsStateMappable {
   final int discoveryTimeout;
   final bool advancedSettings;
 
+  /// When true (Windows), convert HEIC/HEIF still images to PNG after receive.
+  final bool convertHeicOnReceive;
+
+  /// Windows-only: how to treat received videos from iOS-like senders.
+  final WindowsVideoConversionMode windowsVideoConversionMode;
+
+  /// Optional full path to ffmpeg.exe; when null, search PATH and app directory.
+  final String? ffmpegCustomPath;
+
   const SettingsState({
     required this.showToken,
     required this.alias,
@@ -63,5 +73,8 @@ class SettingsState with SettingsStateMappable {
     required this.shareViaLinkAutoAccept,
     required this.discoveryTimeout,
     required this.advancedSettings,
+    required this.convertHeicOnReceive,
+    required this.windowsVideoConversionMode,
+    required this.ffmpegCustomPath,
   });
 }

@@ -68,6 +68,9 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
 endif()
 
+# Bundle FFmpeg for MOV/HEIC conversion (download on first CMake configure, or use windows/ffmpeg/ffmpeg.exe).
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/bundle_ffmpeg.cmake")
+
 set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 
@@ -76,10 +79,17 @@ install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
 
 install(FILES
   "${BINARY_NAME}.exe.manifest"
-  "localsend_msix_helper.msix"
   "install_msix_helper.ps1"
   DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
+
+# The helper package is optional in local/dev builds and may be absent in forks.
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/localsend_msix_helper.msix")
+  install(FILES
+    "localsend_msix_helper.msix"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    COMPONENT Runtime)
+endif()
 
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)

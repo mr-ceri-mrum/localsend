@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/widget/responsive_builder.dart';
 
@@ -30,9 +31,8 @@ class BigButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: filled ? colorScheme.primary : colorScheme.secondaryContainerIfDark,
           foregroundColor: filled ? colorScheme.onPrimary : colorScheme.onSecondaryContainerIfDark,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(IosStyle.radiusMedium)),
+          side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.2)),
           padding: EdgeInsets.only(left: 2, right: 2, top: 10 + desktopPaddingFix, bottom: 8 + desktopPaddingFix),
         ),
         onPressed: onTap,
