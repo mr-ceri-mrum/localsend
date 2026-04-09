@@ -377,9 +377,28 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
                               if (fileStatus == FileStatus.sending)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),
-                                  child: CustomProgressBar(
-                                    progress: progressNotifier.getProgress(sessionId: widget.sessionId, fileId: file.id),
-                                  ),
+                                  child: progressNotifier.isWindowsReceivePostProcess(
+                                    sessionId: widget.sessionId,
+                                    fileId: file.id,
+                                  )
+                                      ? Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              t.progressPage.converting,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                height: 1.2,
+                                                color: Theme.of(context).colorScheme.primary,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            const CustomProgressBar(progress: null),
+                                          ],
+                                        )
+                                      : CustomProgressBar(
+                                          progress: progressNotifier.getProgress(sessionId: widget.sessionId, fileId: file.id),
+                                        ),
                                 )
                               else
                                 Row(

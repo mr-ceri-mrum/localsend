@@ -61,10 +61,12 @@ class SendTabMobileHeader extends StatelessWidget {
 class SendTabMobileSelectionGrid extends StatelessWidget {
   final List<FilePickerOption> options;
   final void Function(FilePickerOption option) onOptionTap;
+  final Widget? extraTile;
 
   const SendTabMobileSelectionGrid({
     required this.options,
     required this.onOptionTap,
+    this.extraTile,
     super.key,
   });
 
@@ -129,8 +131,11 @@ class SendTabMobileSelectionGrid extends StatelessWidget {
         crossAxisSpacing: 12,
         childAspectRatio: 1.15,
       ),
-      itemCount: options.length,
+      itemCount: options.length + (extraTile == null ? 0 : 1),
       itemBuilder: (context, index) {
+        if (index >= options.length) {
+          return extraTile!;
+        }
         final option = options[index];
         final tint = _tint(option);
         return Material(

@@ -390,6 +390,8 @@ class _TranslationsProgressPageRu extends TranslationsProgressPageEn {
   @override
   String get titleReceiving => 'Получение файлов';
   @override
+  String get converting => 'Конвертация для совместимости…';
+  @override
   String get savedToGallery => 'Сохранено в галереи';
   @override
   late final _TranslationsProgressPageTotalRu total = _TranslationsProgressPageTotalRu._(_root);

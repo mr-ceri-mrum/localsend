@@ -231,6 +231,7 @@
   "progressPage": {
     "titleSending": "Отправка файлов",
     "titleReceiving": "Получение файлов",
+    "converting": "Конвертация для совместимости…",
     "savedToGallery": "Сохранено в галереи",
     "total": {
       "title": {

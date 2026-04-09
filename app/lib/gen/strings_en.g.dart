@@ -472,6 +472,9 @@ class TranslationsProgressPageEn {
   /// en: 'Receiving files'
   String get titleReceiving => 'Receiving files';
 
+  /// en: 'Converting for compatibility…'
+  String get converting => 'Converting for compatibility…';
+
   /// en: 'Saved in Photos'
   String get savedToGallery => 'Saved in Photos';
 

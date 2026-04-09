@@ -2,6 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:collection/collection.dart';
 import 'package:common/model/device.dart';
 import 'package:common/model/session_status.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
@@ -15,10 +16,13 @@ import 'package:localsend_app/provider/network/scan_facade.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
+import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/provider/windows_manual_conversion_provider.dart';
 import 'package:localsend_app/util/device_type_ext.dart';
 import 'package:localsend_app/util/favorites.dart';
 import 'package:localsend_app/util/file_size_helper.dart';
 import 'package:localsend_app/util/native/file_picker.dart';
+import 'package:localsend_app/util/native/pick_directory_path.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/custom_icon_button.dart';
 import 'package:localsend_app/widget/custom_progress_bar.dart';
@@ -28,6 +32,7 @@ import 'package:localsend_app/widget/file_thumbnail.dart';
 import 'package:localsend_app/widget/list_tile/device_placeholder_list_tile.dart';
 import 'package:localsend_app/widget/responsive_list_view.dart';
 import 'package:localsend_app/widget/rotating_widget.dart';
+import 'package:path/path.dart' as p;
 import 'package:refena_flutter/refena_flutter.dart';
 import 'package:routerino/routerino.dart';
 
@@ -89,6 +94,7 @@ class SendTab extends StatelessWidget {
                               onOptionTap: (option) async => ref.global.dispatchAsync(
                                 PickFileAction(option: option, context: context),
                               ),
+                              extraTile: checkPlatform([TargetPlatform.windows]) ? const _WindowsConvertTile() : null,
                             )
                           else
                             Card(
@@ -541,5 +547,164 @@ extension on SessionStatus {
       case SessionStatus.canceledByReceiver:
         return t.progressPage.total.title.canceledReceiver;
     }
+  }
+}
+
+class _WindowsConvertTile extends StatefulWidget {
+  const _WindowsConvertTile();
+
+  @override
+  State<_WindowsConvertTile> createState() => _WindowsConvertTileState();
+}
+
+class _WindowsConvertTileState extends State<_WindowsConvertTile> {
+  @override
+  Widget build(BuildContext context) {
+    final conversion = context.ref.watch(windowsManualConversionProvider);
+    final tint = const Color(0xFF7EA0FF);
+    return Material(
+      color: const Color(0xFF14171D),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: conversion.isConverting ? null : () => _startManualConversion(context),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: tint.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  conversion.isConverting ? Icons.sync : Icons.transform,
+                  color: tint,
+                  size: 22,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                conversion.isConverting ? 'Converting...' : 'Convert',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              if (conversion.isConverting) ...[
+                Text(
+                  '${conversion.status} • ${(conversion.elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(conversion.elapsedSeconds % 60).toString().padLeft(2, '0')}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                const CustomProgressBar(progress: null, borderRadius: 8),
+              ] else
+                Text(
+                  'Convert file formats',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _startManualConversion(BuildContext context) async {
+    final preset = await _pickPreset(context);
+    if (preset == null || !mounted) {
+      return;
+    }
+
+    final selected = await _pickInputFile(preset);
+    if (selected == null || !mounted) {
+      return;
+    }
+
+    final outDir = await pickDirectoryPath();
+    if (outDir == null || !mounted) {
+      return;
+    }
+
+    final ffmpegPath = context.ref.read(settingsProvider).ffmpegCustomPath;
+    final result = await context.ref.notifier(windowsManualConversionProvider).start(
+      inputPath: selected.path,
+      outputDirectory: outDir,
+      preset: preset,
+      ffmpegCustomPath: ffmpegPath,
+    );
+
+    if (!mounted) {
+      return;
+    }
+    if (result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Conversion failed. Check FFmpeg path in settings.')),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Converted: ${p.basename(result)}')),
+    );
+  }
+
+  Future<WindowsConversionPreset?> _pickPreset(BuildContext context) async {
+    return showModalBottomSheet<WindowsConversionPreset>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.image_outlined),
+                title: const Text('Image to PNG (HEIC/HEIF/JPG/PNG)'),
+                onTap: () => context.pop(WindowsConversionPreset.imageToPng),
+              ),
+              ListTile(
+                leading: const Icon(Icons.movie_creation_outlined),
+                title: const Text('Video to MP4 (fast remux)'),
+                onTap: () => context.pop(WindowsConversionPreset.videoRemuxMp4),
+              ),
+              ListTile(
+                leading: const Icon(Icons.hd_outlined),
+                title: const Text('Video to MP4 H.264 (max compatibility)'),
+                onTap: () => context.pop(WindowsConversionPreset.videoTranscodeMp4),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<XFile?> _pickInputFile(WindowsConversionPreset preset) async {
+    final groups = switch (preset) {
+      WindowsConversionPreset.imageToPng => const [
+        XTypeGroup(label: 'Images', extensions: ['heic', 'heif', 'jpg', 'jpeg', 'png', 'webp', 'bmp']),
+      ],
+      WindowsConversionPreset.videoRemuxMp4 || WindowsConversionPreset.videoTranscodeMp4 => const [
+        XTypeGroup(label: 'Videos', extensions: ['mov', 'm4v', 'mp4', 'mkv', 'avi', 'webm']),
+      ],
+    };
+
+    return openFile(
+      acceptedTypeGroups: groups,
+    );
   }
 }

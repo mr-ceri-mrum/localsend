@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomProgressBar extends StatelessWidget {
+  /// 0..1 while downloading; `null` for indeterminate (e.g. post-receive conversion on Windows).
   final double? progress;
   final double borderRadius;
   final Color? color;

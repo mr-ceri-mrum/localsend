@@ -253,6 +253,7 @@
   "progressPage": {
     "titleSending": "Sending files",
     "titleReceiving": "Receiving files",
+    "converting": "Converting for compatibility…",
     "savedToGallery": "Saved in Photos",
     "total": {
       "title": {

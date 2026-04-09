@@ -111,6 +111,16 @@ String _historyRelativeName(String outputPath, String destinationDirectory) {
   return rel.replaceAll('\\', '/');
 }
 
+/// Whether [applyWindowsReceiveConversion] may convert this file for the current [settings].
+/// Does not check FFmpeg availability (that step can no-op quickly if missing).
+bool shouldAttemptWindowsReceiveConversion({
+  required FileType fileType,
+  required String extensionLower,
+  required SettingsState settings,
+}) {
+  return _needsConversionForFile(fileType, extensionLower, settings);
+}
+
 /// Whether this file might be converted given current settings (before checking ffmpeg availability).
 bool _needsConversionForFile(FileType fileType, String extLower, SettingsState settings) {
   if (fileType == FileType.image && settings.convertHeicOnReceive && (extLower == 'heic' || extLower == 'heif')) {
@@ -228,11 +238,16 @@ Future<WindowsReceiveFormatConversionResult?> _remuxToMp4({
     outPath,
   ]);
   if (code != 0) {
-    _logger.warning('Video remux failed');
+    _logger.warning('Video remux failed; trying H.264 transcode as fallback');
     try {
       await File(outPath).delete();
     } catch (_) {}
-    return null;
+    return _transcodeToH264(
+      savedFilePath: savedFilePath,
+      ffmpeg: ffmpeg,
+      destinationDirectory: destinationDirectory,
+      createdDirectories: createdDirectories,
+    );
   }
 
   try {
@@ -263,47 +278,106 @@ Future<WindowsReceiveFormatConversionResult?> _transcodeToH264({
     createdDirectories: createdDirectories,
   );
 
-  final code = await _runFfmpeg(ffmpeg, [
+  final attempts = <List<String>>[
+    _ffmpegTranscodeH264Args(
+      input: savedFilePath,
+      output: outPath,
+      inputPrefix: const [],
+      videoOnly: false,
+    ),
+    _ffmpegTranscodeH264Args(
+      input: savedFilePath,
+      output: outPath,
+      inputPrefix: const [
+        '-fflags',
+        '+genpts+discardcorrupt',
+        '-err_detect',
+        'ignore_err',
+      ],
+      videoOnly: false,
+    ),
+    _ffmpegTranscodeH264Args(
+      input: savedFilePath,
+      output: outPath,
+      inputPrefix: const [
+        '-fflags',
+        '+genpts+discardcorrupt',
+        '-err_detect',
+        'ignore_err',
+      ],
+      videoOnly: true,
+    ),
+  ];
+
+  for (var i = 0; i < attempts.length; i++) {
+    try {
+      await File(outPath).delete();
+    } catch (_) {}
+    final code = await _runFfmpeg(ffmpeg, attempts[i]);
+    if (code == 0) {
+      final outFile = File(outPath);
+      if (await outFile.exists() && await outFile.length() > 0) {
+        _logger.fine('Video transcode succeeded (attempt ${i + 1}/${attempts.length})');
+        try {
+          await File(savedFilePath).delete();
+        } catch (e) {
+          _logger.warning('Could not delete source video after transcode', e);
+        }
+        final size = await outFile.length();
+        return WindowsReceiveFormatConversionResult(
+          path: outPath,
+          fileName: _historyRelativeName(outPath, destinationDirectory),
+          fileSize: size,
+        );
+      }
+    }
+    _logger.warning('Video transcode attempt ${i + 1}/${attempts.length} failed (exit $code)');
+  }
+
+  try {
+    await File(outPath).delete();
+  } catch (_) {}
+  _logger.warning('Video transcode failed after ${attempts.length} attempts');
+  return null;
+}
+
+/// H.264/AAC tuned for broad Windows playback (8-bit 4:2:0, even dimensions, AAC stereo).
+List<String> _ffmpegTranscodeH264Args({
+  required String input,
+  required String output,
+  required List<String> inputPrefix,
+  required bool videoOnly,
+}) {
+  return <String>[
     '-hide_banner',
     '-loglevel',
     'error',
+    ...inputPrefix,
     '-y',
     '-i',
-    savedFilePath,
+    input,
+    if (videoOnly) ...['-map', '0:v:0', '-an'] else ...['-sn', '-dn'],
     '-c:v',
     'libx264',
     '-crf',
     '18',
     '-preset',
     'medium',
-    '-c:a',
-    'aac',
-    '-b:a',
-    '192k',
+    '-profile:v',
+    'high',
+    '-level',
+    '4.1',
+    '-pix_fmt',
+    'yuv420p',
+    '-vf',
+    'scale=trunc(iw/2)*2:trunc(ih/2)*2:flags=lanczos',
+    if (!videoOnly) ...['-c:a', 'aac', '-b:a', '192k', '-ar', '48000', '-ac', '2'],
     '-movflags',
     '+faststart',
-    outPath,
-  ]);
-  if (code != 0) {
-    _logger.warning('Video transcode failed');
-    try {
-      await File(outPath).delete();
-    } catch (_) {}
-    return null;
-  }
-
-  try {
-    await File(savedFilePath).delete();
-  } catch (e) {
-    _logger.warning('Could not delete source video after transcode', e);
-  }
-
-  final size = await File(outPath).length();
-  return WindowsReceiveFormatConversionResult(
-    path: outPath,
-    fileName: _historyRelativeName(outPath, destinationDirectory),
-    fileSize: size,
-  );
+    '-max_muxing_queue_size',
+    '9999',
+    output,
+  ];
 }
 
 Future<int> _runFfmpeg(String executable, List<String> args) async {

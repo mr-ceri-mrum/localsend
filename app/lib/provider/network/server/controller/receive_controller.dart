@@ -38,6 +38,7 @@ import 'package:localsend_app/provider/receive_history_provider.dart';
 import 'package:localsend_app/provider/selection/selected_receiving_files_provider.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/util/file_path_helper.dart';
 import 'package:localsend_app/util/native/directories.dart';
 import 'package:localsend_app/util/native/file_saver.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
@@ -530,17 +531,48 @@ class ReceiveController {
       var historyFileName = receivingFile.desiredName!;
       var historyFileSize = receivingFile.file.size;
       if (filePath != null && filePath.isNotEmpty && Platform.isWindows) {
-        final converted = await applyWindowsReceiveConversion(
-          savedFilePath: filePath,
+        final settings = server.ref.read(settingsProvider);
+        final ext = filePath.extension.toLowerCase();
+        final willPostProcess = shouldAttemptWindowsReceiveConversion(
           fileType: fileType,
-          settings: server.ref.read(settingsProvider),
-          destinationDirectory: receiveState.destinationDirectory,
-          createdDirectories: receiveState.createdDirectories,
+          extensionLower: ext,
+          settings: settings,
         );
-        if (converted != null) {
-          filePath = converted.path;
-          historyFileName = converted.fileName;
-          historyFileSize = converted.fileSize;
+        if (willPostProcess) {
+          server.ref
+              .notifier(progressProvider)
+              .setProgress(
+                sessionId: receiveState.sessionId,
+                fileId: fileId,
+                progress: 0.92,
+              );
+          server.ref.notifier(progressProvider).setWindowsReceivePostProcess(
+                sessionId: receiveState.sessionId,
+                fileId: fileId,
+                active: true,
+              );
+        }
+        try {
+          final converted = await applyWindowsReceiveConversion(
+            savedFilePath: filePath,
+            fileType: fileType,
+            settings: settings,
+            destinationDirectory: receiveState.destinationDirectory,
+            createdDirectories: receiveState.createdDirectories,
+          );
+          if (converted != null) {
+            filePath = converted.path;
+            historyFileName = converted.fileName;
+            historyFileSize = converted.fileSize;
+          }
+        } finally {
+          if (willPostProcess) {
+            server.ref.notifier(progressProvider).setWindowsReceivePostProcess(
+                  sessionId: receiveState.sessionId,
+                  fileId: fileId,
+                  active: false,
+                );
+          }
         }
       }
 
