@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/state/server/receive_session_state.dart';
+import 'package:localsend_app/pages/home_page.dart' show HomeTab;
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
@@ -20,6 +21,7 @@ import 'package:localsend_app/util/native/open_file.dart';
 import 'package:localsend_app/util/native/open_folder.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/util/native/taskbar_helper.dart';
+import 'package:localsend_app/util/ui/app_root_navigation.dart';
 import 'package:localsend_app/util/ui/nav_bar_padding.dart';
 import 'package:localsend_app/widget/custom_basic_appbar.dart';
 import 'package:localsend_app/widget/custom_progress_bar.dart';
@@ -60,6 +62,26 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
   Timer? _wakelockPlusTimer;
 
   bool _advanced = false;
+
+  /// If the session is cleared while this route is still visible (e.g. background transfer
+  /// auto-close), we recover by resetting the navigator once instead of showing an empty scaffold.
+  bool _scheduledPopOnMissingSession = false;
+
+  /// Whether this page is showing a receive session (vs send). Set in [didChangeDependencies]
+  /// because [ref] must not be used during [initState].
+  bool _isReceiveFlow = false;
+  bool _receiveFlowResolved = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_receiveFlowResolved) {
+      return;
+    }
+    _receiveFlowResolved = true;
+    final recv = ref.read(serverProvider)?.session;
+    _isReceiveFlow = recv != null && recv.sessionId == widget.sessionId;
+  }
 
   @override
   void initState() {
@@ -133,38 +155,49 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
     final sendSession = ref.read(sendProvider)[widget.sessionId];
     final SessionStatus? status = receiveSession?.status ?? sendSession?.status;
     final keepSession = !closeSession && (status == SessionStatus.sending || status == SessionStatus.finishedWithErrors);
-    final result = status == null || keepSession || await _askCancelConfirmation(status);
+    final result = status == null || keepSession || await _confirmExitDialogIfSending(status);
 
-    if (result && mounted) {
-      // ignore: unawaited_futures
-      context.popUntilRoot();
+    if (!result || !mounted) {
+      return;
     }
-  }
 
-  Future<bool> _askCancelConfirmation(SessionStatus status) async {
-    final bool result = switch (status == SessionStatus.sending) {
-      true => (await context.pushBottomSheet(() => const CancelSessionDialog())) == true,
-      false => true,
-    };
-    if (result) {
-      final receiveSession = ref.read(serverProvider)?.session;
-      final sendState = ref.read(sendProvider)[widget.sessionId];
+    // Pop before closing the session. Otherwise the send/receive providers drop the
+    // session first, this page rebuilds with no session (empty scaffold), and the UI
+    // can stick on a black screen until navigation catches up (seen on iOS simulator).
+    final sessionId = widget.sessionId;
+    final hasReceive = receiveSession != null;
+    final recvWasSending = receiveSession?.status == SessionStatus.sending;
+    final sendWasSending = sendSession?.status == SessionStatus.sending;
+    final hasSend = sendSession != null;
 
-      if (receiveSession != null) {
-        if (receiveSession.status == SessionStatus.sending) {
-          ref.notifier(serverProvider).cancelSession();
+    replaceNavigatorStackWithAppRoot(homeTab: _isReceiveFlow ? HomeTab.receive : HomeTab.send);
+
+    // Navigation is applied synchronously, but this route is not disposed until after the current
+    // frame. If we clear the session immediately, ProgressPage still rebuilds once with
+    // no session (empty scaffold / black screen). Defer cleanup to the next frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final globalRef = RefenaScope.defaultRef;
+      if (hasReceive) {
+        if (recvWasSending) {
+          globalRef.notifier(serverProvider).cancelSession();
         } else {
-          ref.notifier(serverProvider).closeSession();
+          globalRef.notifier(serverProvider).closeSession();
         }
-      } else if (sendState != null) {
-        if (sendState.status == SessionStatus.sending) {
-          ref.notifier(sendProvider).cancelSession(widget.sessionId);
+      } else if (hasSend) {
+        if (sendWasSending) {
+          globalRef.notifier(sendProvider).cancelSession(sessionId);
         } else {
-          ref.notifier(sendProvider).closeSession(widget.sessionId);
+          globalRef.notifier(sendProvider).closeSession(sessionId);
         }
       }
+    });
+  }
+
+  Future<bool> _confirmExitDialogIfSending(SessionStatus status) async {
+    if (status == SessionStatus.sending) {
+      return (await context.pushBottomSheet(() => const CancelSessionDialog())) == true;
     }
-    return result;
+    return true;
   }
 
   @override
@@ -192,8 +225,15 @@ class _ProgressPageState extends State<ProgressPage> with Refena {
     final SessionState? commonSessionState = receiveSession ?? sendSession;
 
     if (commonSessionState == null) {
+      if (!_scheduledPopOnMissingSession) {
+        _scheduledPopOnMissingSession = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          replaceNavigatorStackWithAppRoot(homeTab: _isReceiveFlow ? HomeTab.receive : HomeTab.send);
+        });
+      }
       return Scaffold(
-        body: Container(),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const SizedBox.expand(),
       );
     }
 

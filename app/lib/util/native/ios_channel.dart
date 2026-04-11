@@ -20,3 +20,13 @@ Future<void> setIosFileTransferBackgroundActive(bool active) async {
     await _methodChannel.invokeMethod(active ? 'beginFileTransferBackground' : 'endFileTransferBackground');
   } catch (_) {}
 }
+
+/// Resets the iOS background execution budget while a transfer is active (call ~every 5s).
+Future<void> pulseIosFileTransferBackground() async {
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
+    return;
+  }
+  try {
+    await _methodChannel.invokeMethod('pulseFileTransferBackground');
+  } catch (_) {}
+}

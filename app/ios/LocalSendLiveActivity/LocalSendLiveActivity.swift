@@ -27,11 +27,8 @@ extension LiveActivitiesAppAttributes {
   }
 }
 
-private let sharedDefault = UserDefaults(suiteName: "group.org.localsend.localsendApp")!
+private let sharedDefault = UserDefaults(suiteName: "group.Ilyas")!
 
-/// UserDefaults in the app group updates when Flutter pushes progress, but ActivityKit may not
-/// re-render the widget when [ContentState] from the plugin is unchanged. Periodic timeline
-/// forces fresh reads so Dynamic Island / lock screen show live percentages.
 private let transferUiPollSeconds: TimeInterval = 0.5
 
 struct FileTransferLiveActivityWidget: Widget {
@@ -56,19 +53,12 @@ struct FileTransferLiveActivityWidget: Widget {
   @ViewBuilder
   private func transferLockScreen(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
     TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      let title = sharedDefault.string(forKey: context.attributes.prefixedKey("title")) ?? "LocalSend"
-      let subtitle = sharedDefault.string(forKey: context.attributes.prefixedKey("subtitle")) ?? ""
-      let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
-
-      VStack(alignment: .leading, spacing: 6) {
-        Text(title)
+      HStack(spacing: 12) {
+        ProgressView()
+          .progressViewStyle(.circular)
+          .tint(.cyan)
+        Text("LocalSend")
           .font(.headline)
-        if !subtitle.isEmpty {
-          Text(subtitle)
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        }
-        ProgressView(value: min(max(progress, 0), 1))
       }
       .padding()
     }
@@ -77,21 +67,13 @@ struct FileTransferLiveActivityWidget: Widget {
   @ViewBuilder
   private func transferExpanded(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
     TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      let title = sharedDefault.string(forKey: context.attributes.prefixedKey("title")) ?? "LocalSend"
-      let subtitle = sharedDefault.string(forKey: context.attributes.prefixedKey("subtitle")) ?? ""
-      let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
-
-      VStack(spacing: 4) {
-        Text(title)
-          .font(.caption.weight(.semibold))
-        if !subtitle.isEmpty {
-          Text(subtitle)
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-        }
-        ProgressView(value: min(max(progress, 0), 1))
+      VStack(spacing: 8) {
+        ProgressView()
+          .progressViewStyle(.circular)
           .tint(.cyan)
+        Text("Transferring...")
+          .font(.caption.weight(.semibold))
+          .foregroundStyle(.secondary)
       }
       .padding(.horizontal, 4)
     }
@@ -100,29 +82,27 @@ struct FileTransferLiveActivityWidget: Widget {
   @ViewBuilder
   private func compactLeading(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
     TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      let isSend = sharedDefault.integer(forKey: context.attributes.prefixedKey("isSending")) == 1
-      Image(systemName: isSend ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-        .foregroundStyle(.cyan)
+      ProgressView()
+        .progressViewStyle(.circular)
+        .tint(.cyan)
     }
   }
 
   @ViewBuilder
   private func compactTrailing(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
     TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
-      Text("\(Int((min(max(progress, 0), 1) * 100).rounded()))%")
-        .font(.caption2.weight(.semibold))
-        .monospacedDigit()
+      ProgressView()
+        .progressViewStyle(.circular)
+        .tint(.cyan)
     }
   }
 
   @ViewBuilder
   private func minimalRegion(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
     TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      let progress = sharedDefault.double(forKey: context.attributes.prefixedKey("progress"))
-      Text("\(Int((min(max(progress, 0), 1) * 100).rounded()))")
-        .font(.caption2.weight(.bold))
-        .monospacedDigit()
+      ProgressView()
+        .progressViewStyle(.circular)
+        .tint(.cyan)
     }
   }
 }

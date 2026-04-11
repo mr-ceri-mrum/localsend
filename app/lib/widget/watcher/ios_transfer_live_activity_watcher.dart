@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:common/model/file_status.dart';
 import 'package:common/model/session_status.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ import 'package:refena_flutter/refena_flutter.dart';
 
 /// Shows a Live Activity / Dynamic Island transfer indicator on iOS 16.1+.
 const _activityId = 'localsend_file_transfer';
-const _appGroupId = 'group.org.localsend.localsendApp';
+const _appGroupId = 'group.Ilyas';
 
 class IosTransferLiveActivityWatcher extends StatefulWidget {
   const IosTransferLiveActivityWatcher({super.key, required this.child});
@@ -35,6 +36,8 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
   Timer? _pollWhileActive;
   int _lastProgressPushMs = 0;
   int _lastSessionSyncMs = 0;
+  /// Cleared when transfer ends; used to reset Island UserDefaults (avoids stale 100% from last run).
+  String? _lastIslandTransferFingerprint;
 
   @override
   void initState() {
@@ -80,6 +83,10 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
           requireNotificationPermission: false,
         );
         _initDone = true;
+        // Kill stale activities from previous app sessions that were never properly ended.
+        try {
+          await _live.endAllActivities();
+        } catch (_) {}
       } catch (_) {
         _initDone = false;
       }
@@ -131,6 +138,7 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
 
       if (!active) {
         _stopPoll();
+        _lastIslandTransferFingerprint = null;
         await _live.endActivity(_activityId);
         return;
       }
@@ -151,36 +159,154 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
         subtitle = receiveSession?.senderAlias ?? '';
       }
 
-      final progress = isSending ? _aggregateSendProgress(sendMap) : _aggregateReceiveProgress(receiveSession);
+      final fingerprint = _transferFingerprint(
+        sendActive: sendActive,
+        receiveActive: receiveActive,
+        sendMap: sendMap,
+        receiveSession: receiveSession,
+      );
+      if (fingerprint != null && fingerprint != _lastIslandTransferFingerprint) {
+        _lastIslandTransferFingerprint = fingerprint;
+        // Same Live Activity id reuses App Group keys; overwrite immediately so Dynamic Island
+        // does not briefly show the previous transfer's 100%.
+        await _live.createOrUpdateActivity(
+          _activityId,
+          {
+            'title': title,
+            'subtitle': subtitle,
+            'progress': 0.0,
+            'progressPct': 0,
+            'isSending': isSending ? 1 : 0,
+          },
+        );
+      }
+
+      final rawProgress = isSending ? _aggregateSendProgress(sendMap) : _aggregateReceiveProgress(receiveSession);
+      final clamped = rawProgress.clamp(0.0, 1.0);
+      final forIsland = _capIslandProgressIfStillWorking(
+        clamped: clamped,
+        isSending: isSending,
+        sendMap: sendMap,
+        receiveSession: receiveSession,
+      );
+      final pct = (forIsland * 100).round().clamp(0, 100);
 
       await _live.createOrUpdateActivity(
         _activityId,
         {
           'title': title,
           'subtitle': subtitle,
-          'progress': progress.clamp(0.0, 1.0),
+          'progress': forIsland,
+          // Integer percent for UserDefaults; some assets report size 0 until sent (avoids "00").
+          'progressPct': pct,
           'isSending': isSending ? 1 : 0,
         },
       );
     } catch (_) {}
   }
 
+  /// Identifies the current transfer so we can reset Island storage when starting a new one.
+  String? _transferFingerprint({
+    required bool sendActive,
+    required bool receiveActive,
+    required Map<String, SendSessionState> sendMap,
+    required ReceiveSessionState? receiveSession,
+  }) {
+    if (sendActive) {
+      final parts = <String>[];
+      for (final e in sendMap.entries) {
+        if (e.value.status == SessionStatus.sending) {
+          final ids = e.value.files.keys.toList()..sort();
+          parts.add('${e.key}:${ids.join(',')}');
+        }
+      }
+      parts.sort();
+      if (parts.isEmpty) {
+        return null;
+      }
+      return 's:${parts.join('|')}';
+    }
+    if (receiveActive && receiveSession != null) {
+      final ids = receiveSession.files.keys.toList()..sort();
+      return 'r:${receiveSession.sessionId}:${ids.join(',')}';
+    }
+    return null;
+  }
+
+  /// Avoid showing 100% on the Island while bytes are still moving (stale keys or progress glitches).
+  double _capIslandProgressIfStillWorking({
+    required double clamped,
+    required bool isSending,
+    required Map<String, SendSessionState> sendMap,
+    required ReceiveSessionState? receiveSession,
+  }) {
+    if (clamped < 1.0) {
+      return clamped;
+    }
+    final stillWorking = _hasFilesStillInFlight(
+      isSending: isSending,
+      sendMap: sendMap,
+      receiveSession: receiveSession,
+    );
+    if (stillWorking) {
+      return 0.999;
+    }
+    return clamped;
+  }
+
+  bool _hasFilesStillInFlight({
+    required bool isSending,
+    required Map<String, SendSessionState> sendMap,
+    required ReceiveSessionState? receiveSession,
+  }) {
+    if (isSending) {
+      for (final s in sendMap.values) {
+        if (s.status != SessionStatus.sending) {
+          continue;
+        }
+        for (final f in s.files.values) {
+          if (f.status == FileStatus.queue || f.status == FileStatus.sending) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    if (receiveSession == null) {
+      return false;
+    }
+    for (final f in receiveSession.files.values) {
+      if (f.status == FileStatus.queue || f.status == FileStatus.sending) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   double _aggregateSendProgress(Map<String, SendSessionState> sendMap) {
     final prog = ref.read(progressProvider);
     var weighted = 0.0;
     var total = 0;
+    var count = 0;
+    var unweightedSum = 0.0;
     for (final s in sendMap.values) {
       if (s.status != SessionStatus.sending) {
         continue;
       }
       for (final f in s.files.values) {
+        final p = prog.getProgress(sessionId: s.sessionId, fileId: f.file.id);
+        count += 1;
+        unweightedSum += p;
         final sz = f.file.size;
         total += sz;
-        weighted += prog.getProgress(sessionId: s.sessionId, fileId: f.file.id) * sz;
+        weighted += p * sz;
       }
     }
-    if (total == 0) {
+    if (count == 0) {
       return 0;
+    }
+    if (total == 0) {
+      return unweightedSum / count;
     }
     return weighted / total;
   }
@@ -192,13 +318,21 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
     final prog = ref.read(progressProvider);
     var weighted = 0.0;
     var total = 0;
+    var count = 0;
+    var unweightedSum = 0.0;
     for (final f in session.files.values) {
+      final p = prog.getProgress(sessionId: session.sessionId, fileId: f.file.id);
+      count += 1;
+      unweightedSum += p;
       final sz = f.file.size;
       total += sz;
-      weighted += prog.getProgress(sessionId: session.sessionId, fileId: f.file.id) * sz;
+      weighted += p * sz;
+    }
+    if (count == 0) {
+      return 0;
     }
     if (total == 0) {
-      return 0;
+      return unweightedSum / count;
     }
     return weighted / total;
   }
