@@ -29,77 +29,134 @@ extension LiveActivitiesAppAttributes {
 
 private let sharedDefault = UserDefaults(suiteName: "group.Ilyas")!
 
-private let transferUiPollSeconds: TimeInterval = 0.5
+private let pollInterval: TimeInterval = 1.0
+
+// MARK: - Read transfer state from shared UserDefaults
+
+private struct TransferData {
+  let title: String
+  let subtitle: String
+  let progress: Double
+  let progressPct: Int
+  let isSending: Bool
+
+  init(context: ActivityViewContext<LiveActivitiesAppAttributes>) {
+    let attrs = context.attributes
+    title = sharedDefault.string(forKey: attrs.prefixedKey("title")) ?? "WinDrop"
+    subtitle = sharedDefault.string(forKey: attrs.prefixedKey("subtitle")) ?? ""
+    let raw = sharedDefault.double(forKey: attrs.prefixedKey("progress"))
+    progress = Swift.min(Swift.max(raw, 0), 1)
+    let rawPct = sharedDefault.integer(forKey: attrs.prefixedKey("progressPct"))
+    progressPct = Swift.min(Swift.max(rawPct, 0), 100)
+    isSending = sharedDefault.integer(forKey: attrs.prefixedKey("isSending")) == 1
+  }
+}
+
+// MARK: - Widget
 
 struct FileTransferLiveActivityWidget: Widget {
   var body: some WidgetConfiguration {
     ActivityConfiguration(for: LiveActivitiesAppAttributes.self) { context in
-      transferLockScreen(context: context)
+      lockScreen(context: context)
     } dynamicIsland: { context in
       DynamicIsland {
         DynamicIslandExpandedRegion(.center) {
-          transferExpanded(context: context)
+          expanded(context: context)
         }
       } compactLeading: {
         compactLeading(context: context)
       } compactTrailing: {
         compactTrailing(context: context)
       } minimal: {
-        minimalRegion(context: context)
+        minimal(context: context)
       }
     }
   }
 
+  // MARK: Lock Screen
+
   @ViewBuilder
-  private func transferLockScreen(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
-    TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
+  private func lockScreen(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
+    TimelineView(.periodic(from: Date(), by: pollInterval)) { _ in
+      let d = TransferData(context: context)
       HStack(spacing: 12) {
-        ProgressView()
-          .progressViewStyle(.circular)
-          .tint(.cyan)
-        Text("LocalSend")
-          .font(.headline)
+        Image(systemName: d.isSending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+          .font(.title2)
+          .foregroundStyle(.cyan)
+        VStack(alignment: .leading, spacing: 4) {
+          Text(d.title)
+            .font(.headline)
+          if !d.subtitle.isEmpty {
+            Text(d.subtitle)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
+          ProgressView(value: d.progress)
+            .tint(.cyan)
+        }
+        Text("\(d.progressPct)%")
+          .font(.title3.monospacedDigit().weight(.semibold))
+          .foregroundStyle(.cyan)
       }
       .padding()
     }
   }
 
+  // MARK: Expanded Island
+
   @ViewBuilder
-  private func transferExpanded(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
-    TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      VStack(spacing: 8) {
-        ProgressView()
-          .progressViewStyle(.circular)
+  private func expanded(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
+    TimelineView(.periodic(from: Date(), by: pollInterval)) { _ in
+      let d = TransferData(context: context)
+      VStack(spacing: 6) {
+        HStack {
+          Image(systemName: d.isSending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+            .foregroundStyle(.cyan)
+          Text(d.isSending ? "Sending..." : "Receiving...")
+            .font(.caption.weight(.semibold))
+          Spacer()
+          Text("\(d.progressPct)%")
+            .font(.caption.monospacedDigit().weight(.bold))
+            .foregroundStyle(.cyan)
+        }
+        ProgressView(value: d.progress)
           .tint(.cyan)
-        Text("Transferring...")
-          .font(.caption.weight(.semibold))
-          .foregroundStyle(.secondary)
+        if !d.subtitle.isEmpty {
+          Text(d.subtitle)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
       }
       .padding(.horizontal, 4)
     }
   }
 
+  // MARK: Compact — leading: icon, trailing: percent
+
   @ViewBuilder
   private func compactLeading(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
-    TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      ProgressView()
-        .progressViewStyle(.circular)
-        .tint(.cyan)
+    TimelineView(.periodic(from: Date(), by: pollInterval)) { _ in
+      let d = TransferData(context: context)
+      Image(systemName: d.isSending ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+        .foregroundStyle(.cyan)
     }
   }
 
   @ViewBuilder
   private func compactTrailing(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
-    TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
-      ProgressView()
-        .progressViewStyle(.circular)
-        .tint(.cyan)
+    TimelineView(.periodic(from: Date(), by: pollInterval)) { _ in
+      let d = TransferData(context: context)
+      Text("\(d.progressPct)%")
+        .font(.caption2.monospacedDigit().weight(.bold))
+        .foregroundStyle(.cyan)
     }
   }
 
+  // MARK: Minimal (when another app also has an activity)
+
   @ViewBuilder
-  private func minimalRegion(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
-    TimelineView(.periodic(from: Date(), by: transferUiPollSeconds)) { _ in
+  private func minimal(context: ActivityViewContext<LiveActivitiesAppAttributes>) -> some View {
+    TimelineView(.periodic(from: Date(), by: pollInterval)) { _ in
       ProgressView()
         .progressViewStyle(.circular)
         .tint(.cyan)
