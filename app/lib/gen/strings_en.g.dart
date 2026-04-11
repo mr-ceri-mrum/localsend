@@ -257,6 +257,8 @@ class TranslationsSendTabEn {
 
   /// en: 'Place items to share.'
   String get placeItems => 'Place items to share.';
+
+  late final TranslationsSendTabWindowsPeerHelpEn windowsPeerHelp = TranslationsSendTabWindowsPeerHelpEn.internal(_root);
 }
 
 // Path: settingsTab
@@ -973,6 +975,28 @@ class TranslationsSendTabSendModesEn {
 
   /// en: 'Share via link'
   String get link => 'Share via link';
+}
+
+// Path: sendTab.windowsPeerHelp
+class TranslationsSendTabWindowsPeerHelpEn {
+  TranslationsSendTabWindowsPeerHelpEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Sending to Windows'
+  String get tooltip => 'Sending to Windows';
+
+  /// en: 'Don’t see your PC?'
+  String get title => 'Don’t see your PC?';
+
+  /// en: 'For a Windows computer to appear in this list, install and run the app on that PC on the same Wi‑Fi as this device. Keep the app open, then pull to refresh or tap search.'
+  String get description =>
+      'For a Windows computer to appear in this list, install and run the app on that PC on the same Wi‑Fi as this device. Keep the app open, then pull to refresh or tap search.';
+
+  /// en: 'Open download page'
+  String get downloadCta => 'Open download page';
 }
 
 // Path: settingsTab.general

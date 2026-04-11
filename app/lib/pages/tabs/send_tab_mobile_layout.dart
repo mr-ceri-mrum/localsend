@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localsend_app/config/ios_style.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/util/native/file_picker.dart';
+import 'package:localsend_app/widget/dialogs/nearby_windows_peer_help_sheet.dart';
 
 /// Dark “Share”-style shell used for the mobile send tab (matches compact grid + banner layout).
 ThemeData sendTabMobileTheme() {
@@ -251,9 +252,11 @@ class SendTabMobileWifiBanner extends StatelessWidget {
 
 class SendTabMobileNearbySectionTitle extends StatelessWidget {
   final bool scanning;
+  final VoidCallback onWindowsPeerHelpTap;
 
   const SendTabMobileNearbySectionTitle({
     required this.scanning,
+    required this.onWindowsPeerHelpTap,
     super.key,
   });
 
@@ -275,7 +278,42 @@ class SendTabMobileNearbySectionTitle extends StatelessWidget {
               ),
             ),
           ),
-          if (scanning)
+          Tooltip(
+            message: t.sendTab.windowsPeerHelp.tooltip,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onWindowsPeerHelpTap,
+                borderRadius: BorderRadius.circular(999),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: IosStyle.cardBorder,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: IosStyle.card),
+                      ),
+                      child: Text(
+                        kWindowsPeerDownloadSiteLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: IosStyle.mutedTextStrong,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (scanning) ...[
+            const SizedBox(width: 6),
             Text(
               '• ${t.sendTab.scan}',
               style: const TextStyle(
@@ -284,6 +322,7 @@ class SendTabMobileNearbySectionTitle extends StatelessWidget {
                 color: accent,
               ),
             ),
+          ],
         ],
       ),
     );

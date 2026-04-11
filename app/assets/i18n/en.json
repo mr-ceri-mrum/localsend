@@ -83,7 +83,13 @@
     },
     "sendModeHelp": "Explanation",
     "help": "Please ensure that the desired target is also on the same Wi-Fi network.",
-    "placeItems": "Place items to share."
+    "placeItems": "Place items to share.",
+    "windowsPeerHelp": {
+      "tooltip": "Sending to Windows",
+      "title": "Don’t see your PC?",
+      "description": "For a Windows computer to appear in this list, install and run the app on that PC on the same Wi‑Fi as this device. Keep the app open, then pull to refresh or tap search.",
+      "downloadCta": "Open download page"
+    }
   },
   "settingsTab": {
     "title": "Settings",

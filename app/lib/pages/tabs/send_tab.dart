@@ -28,6 +28,7 @@ import 'package:localsend_app/widget/custom_icon_button.dart';
 import 'package:localsend_app/widget/custom_progress_bar.dart';
 import 'package:localsend_app/widget/device_bage.dart';
 import 'package:localsend_app/widget/dialogs/add_file_dialog.dart';
+import 'package:localsend_app/widget/dialogs/nearby_windows_peer_help_sheet.dart';
 import 'package:localsend_app/widget/file_thumbnail.dart';
 import 'package:localsend_app/widget/list_tile/device_placeholder_list_tile.dart';
 import 'package:localsend_app/widget/responsive_list_view.dart';
@@ -181,7 +182,10 @@ class SendTab extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          SendTabMobileNearbySectionTitle(scanning: scanning),
+                          SendTabMobileNearbySectionTitle(
+                            scanning: scanning,
+                            onWindowsPeerHelpTap: () async => NearbyWindowsPeerHelpSheet.open(context),
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(top: 4, bottom: 8),
                             child: Align(

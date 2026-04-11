@@ -224,6 +224,8 @@ class _TranslationsSendTabRu extends TranslationsSendTabEn {
   String get help => 'Пожалуйста, убедитесь, что получатель находится в той же Wi-Fi сети, что и отправитель.';
   @override
   String get placeItems => 'Добавьте файлы, чтобы поделиться.';
+  @override
+  late final _TranslationsSendTabWindowsPeerHelpRu windowsPeerHelp = _TranslationsSendTabWindowsPeerHelpRu._(_root);
 }
 
 // Path: settingsTab
@@ -772,6 +774,24 @@ class _TranslationsSendTabSendModesRu extends TranslationsSendTabSendModesEn {
   String get multiple => 'Несколько получателей';
   @override
   String get link => 'Поделиться по ссылке';
+}
+
+// Path: sendTab.windowsPeerHelp
+class _TranslationsSendTabWindowsPeerHelpRu extends TranslationsSendTabWindowsPeerHelpEn {
+  _TranslationsSendTabWindowsPeerHelpRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get tooltip => 'Отправка на Windows';
+  @override
+  String get title => 'Не видите компьютер?';
+  @override
+  String get description =>
+      'Чтобы ПК с Windows появился в списке, установите и запустите приложение на этом компьютере в той же Wi‑Fi сети, что и этот телефон. Оставьте приложение открытым и обновите поиск.';
+  @override
+  String get downloadCta => 'Открыть страницу загрузки';
 }
 
 // Path: settingsTab.general
