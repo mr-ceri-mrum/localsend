@@ -10,6 +10,7 @@ import 'package:common/model/dto/multicast_dto.dart';
 import 'package:common/util/logger.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -46,6 +47,7 @@ import 'package:localsend_app/util/native/device_info_helper.dart';
 import 'package:localsend_app/util/native/macos_channel.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/util/native/tray_helper.dart';
+import 'package:localsend_app/util/update/update_service.dart';
 import 'package:localsend_app/util/rhttp.dart';
 import 'package:localsend_app/util/ui/dynamic_colors.dart';
 import 'package:localsend_app/util/ui/snackbar.dart';
@@ -56,6 +58,7 @@ import 'package:share_handler/share_handler.dart';
 import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger('Init');
+const _updateService = UpdateService();
 
 /// Will be called before the MaterialApp started
 Future<RefenaContainer> preInit(List<String> args) async {
@@ -297,12 +300,91 @@ Future<void> postInit(BuildContext context, Ref ref, bool appStart) async {
     ref.global.dispatchAsync(ClearCacheAction()); // ignore: unawaited_futures
   }
 
+  if (appStart) {
+    // ignore: unawaited_futures
+    _checkAndPromptForUpdate(context);
+  }
+
   // [FOSS_REMOVE_START]
   if (checkPlatformSupportPayment()) {
     // ignore: unawaited_futures
     ref.redux(purchaseProvider).dispatchAsync(InitPurchaseStream());
   }
   // [FOSS_REMOVE_END]
+}
+
+Future<void> _checkAndPromptForUpdate(BuildContext context) async {
+  if (!Platform.isWindows) {
+    return;
+  }
+
+  final result = await _updateService.checkForUpdates();
+  if (!context.mounted) {
+    return;
+  }
+
+  if (result.isUpdateAvailable && result.releaseInfo != null) {
+    final shouldUpdate = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        final info = result.releaseInfo!;
+        return AlertDialog(
+          title: const Text('Update available'),
+          content: Text('A new version (${info.remoteVersion}) is available. Do you want to install it now?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Later'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Update now'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldUpdate != true) {
+      return;
+    }
+
+    final installResult = await _updateService.downloadAndInstall(
+      installerUrl: result.releaseInfo!.installerUrl,
+    );
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (installResult.isSuccess) {
+      exit(0);
+    }
+
+    context.showSnackBar(_mapInstallErrorToMessage(installResult));
+    return;
+  }
+
+  if (result.errorType == null) {
+    return;
+  }
+
+  _logger.warning(
+    'Update check failed: ${result.errorType} (${result.details ?? 'no details'})',
+  );
+}
+
+String _mapInstallErrorToMessage(InstallUpdateResult result) {
+  switch (result.errorType) {
+    case InstallUpdateErrorType.notWindows:
+      return 'Auto update is only supported on Windows.';
+    case InstallUpdateErrorType.downloadFailed:
+      return 'Unable to download update installer. Check your internet connection and try again.';
+    case InstallUpdateErrorType.processStartFailed:
+      return 'The installer was downloaded, but could not be started.';
+    case null:
+      return 'Update failed.';
+  }
 }
 
 class _HandleShareIntentAction extends AsyncGlobalAction {
