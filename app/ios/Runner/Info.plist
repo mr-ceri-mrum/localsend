@@ -153,5 +153,10 @@
 
     <key>NSSupportsLiveActivities</key>
     <true/>
+
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+    </array>
 </dict>
 </plist>

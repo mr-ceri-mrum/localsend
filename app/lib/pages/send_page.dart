@@ -5,11 +5,13 @@ import 'package:common/model/session_status.dart';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
+import 'package:localsend_app/pages/home_page.dart' show HomeTab;
 import 'package:localsend_app/provider/device_info_provider.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/util/favorites.dart';
 import 'package:localsend_app/util/native/taskbar_helper.dart';
+import 'package:localsend_app/util/ui/app_root_navigation.dart';
 import 'package:localsend_app/widget/animations/initial_fade_transition.dart';
 import 'package:localsend_app/widget/animations/initial_slide_transition.dart';
 import 'package:localsend_app/widget/custom_basic_appbar.dart';
@@ -37,6 +39,7 @@ class SendPage extends StatefulWidget {
 class _SendPageState extends State<SendPage> with Refena {
   Device? _myDevice;
   Device? _targetDevice;
+  bool _scheduledHomeRecovery = false;
 
   @override
   void dispose() {
@@ -73,8 +76,15 @@ class _SendPageState extends State<SendPage> with Refena {
       },
     );
     if (sendState == null && _myDevice == null && _targetDevice == null) {
+      if (!_scheduledHomeRecovery) {
+        _scheduledHomeRecovery = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          replaceNavigatorStackWithAppRoot(homeTab: HomeTab.send);
+        });
+      }
       return Scaffold(
-        body: Container(),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const SizedBox.expand(),
       );
     }
     final myDevice = ref.watch(deviceFullInfoProvider);
