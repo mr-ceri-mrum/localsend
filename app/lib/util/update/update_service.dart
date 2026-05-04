@@ -125,25 +125,23 @@ class UpdateService {
         return const UpdateCheckResult.error(UpdateCheckErrorType.noAssets);
       }
 
-      final firstAsset = assets.first;
-      if (firstAsset is! Map<String, dynamic>) {
-        return const UpdateCheckResult.error(UpdateCheckErrorType.invalidResponse, details: 'Invalid assets[0]');
-      }
-
-      final installerUrl = firstAsset['browser_download_url'] as String?;
-      if (installerUrl == null || installerUrl.trim().isEmpty) {
-        return const UpdateCheckResult.error(
-          UpdateCheckErrorType.invalidResponse,
-          details: 'Missing assets[0].browser_download_url',
-        );
-      }
-
       final remoteVersion = _normalizeVersion(tagName);
       final normalizedLocalVersion = _normalizeVersion(localVersion);
       if (!_isValidSemver(remoteVersion) || !_isValidSemver(normalizedLocalVersion)) {
         return UpdateCheckResult.error(
           UpdateCheckErrorType.invalidResponse,
           details: 'Invalid semver local="$normalizedLocalVersion" remote="$remoteVersion"',
+        );
+      }
+
+      final installerUrl = _pickInstallerUrl(
+        assets: assets,
+        remoteVersion: remoteVersion,
+      );
+      if (installerUrl == null) {
+        return const UpdateCheckResult.error(
+          UpdateCheckErrorType.noAssets,
+          details: 'No downloadable Windows installer (.exe) found in release assets',
         );
       }
 
@@ -173,6 +171,34 @@ class UpdateService {
     } finally {
       client.close(force: true);
     }
+  }
+
+  String? _pickInstallerUrl({
+    required List assets,
+    required String remoteVersion,
+  }) {
+    Map<String, dynamic>? fallback;
+    final normalizedVersion = remoteVersion.toLowerCase();
+
+    for (final asset in assets) {
+      if (asset is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final name = (asset['name'] as String?)?.toLowerCase() ?? '';
+      final url = (asset['browser_download_url'] as String?)?.trim() ?? '';
+      if (url.isEmpty || (!url.toLowerCase().endsWith('.exe') && !name.endsWith('.exe'))) {
+        continue;
+      }
+
+      fallback ??= asset;
+
+      if (name.contains(normalizedVersion) || url.toLowerCase().contains(normalizedVersion)) {
+        return url;
+      }
+    }
+
+    return (fallback?['browser_download_url'] as String?)?.trim();
   }
 
   Future<InstallUpdateResult> downloadAndInstall({
