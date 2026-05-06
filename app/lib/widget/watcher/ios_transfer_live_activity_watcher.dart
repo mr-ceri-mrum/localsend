@@ -11,11 +11,13 @@ import 'package:localsend_app/model/state/server/receive_session_state.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
+import 'package:localsend_app/util/native/ios_channel.dart' show pulseIosFileTransferBackground;
 import 'package:localsend_app/util/native/ios_live_activity_sync.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 /// Shows a Live Activity / Dynamic Island transfer indicator on iOS 16.1+.
 const _activityId = 'localsend_file_transfer';
+/// Must match `com.apple.security.application-groups` in Runner + Live Activity entitlements (case-sensitive).
 const _appGroupId = 'group.Ilyas';
 
 class IosTransferLiveActivityWatcher extends StatefulWidget {
@@ -197,11 +199,12 @@ class _IosTransferLiveActivityWatcherState extends State<IosTransferLiveActivity
           'title': title,
           'subtitle': subtitle,
           'progress': forIsland,
-          // Integer percent for UserDefaults; some assets report size 0 until sent (avoids "00").
           'progressPct': pct,
           'isSending': isSending ? 1 : 0,
         },
       );
+      // Flush shared UserDefaults to disk so the widget extension reads fresh values.
+      unawaited(pulseIosFileTransferBackground());
     } catch (_) {}
   }
 

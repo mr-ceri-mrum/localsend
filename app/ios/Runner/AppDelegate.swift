@@ -8,8 +8,12 @@ import AVFoundation
   private var fileTransferRenewTimer: Timer?
   private var silentAudioPlayer: AVAudioPlayer?
   private var isTransferActive = false
+  private var liveActivitySyncChannel: FlutterMethodChannel?
+  private var liveActivitySyncTimer: Timer?
 
   private static let backgroundTaskRenewIntervalSeconds: TimeInterval = 5
+  /// Nudge Flutter to push Live Activity progress while backgrounded (Dart timers are throttled).
+  private static let liveActivitySyncIntervalSeconds: TimeInterval = 1.2
 
   override func application(
     _ application: UIApplication,
@@ -19,6 +23,10 @@ import AVFoundation
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
 
     let engine = controller.engine
+    liveActivitySyncChannel = FlutterMethodChannel(
+      name: "ios-delegate-callbacks",
+      binaryMessenger: engine.binaryMessenger
+    )
     let channel = FlutterMethodChannel(
       name: "ios-delegate-channel",
       binaryMessenger: engine.binaryMessenger
@@ -56,17 +64,28 @@ import AVFoundation
     startSilentAudio()
     beginNewBackgroundTaskIfNeeded()
     ensureRenewTimer()
+    ensureLiveActivitySyncTimer()
   }
 
   private func pulseFileTransferBackground() {
     isTransferActive = true
     startSilentAudio()
+    // Flush shared UserDefaults so the Live Activity widget extension sees fresh progress values.
+    UserDefaults(suiteName: "group.Ilyas")?.synchronize()
+    requestFlutterLiveActivitySync()
     if fileTransferBackgroundTask == .invalid {
       beginNewBackgroundTaskIfNeeded()
     } else {
       renewBackgroundTask()
     }
     ensureRenewTimer()
+    ensureLiveActivitySyncTimer()
+  }
+
+  /// When iOS throttles the Dart isolate in the background, Flutter timers may not run; the native
+  /// renew loop still fires on the main RunLoop and nudges Dart to push the latest progress.
+  private func requestFlutterLiveActivitySync() {
+    liveActivitySyncChannel?.invokeMethod("requestLiveActivitySync", arguments: nil)
   }
 
   private func stopFileTransferBackground() {
@@ -74,6 +93,8 @@ import AVFoundation
     stopSilentAudio()
     fileTransferRenewTimer?.invalidate()
     fileTransferRenewTimer = nil
+    liveActivitySyncTimer?.invalidate()
+    liveActivitySyncTimer = nil
     if fileTransferBackgroundTask != .invalid {
       UIApplication.shared.endBackgroundTask(fileTransferBackgroundTask)
       fileTransferBackgroundTask = .invalid
@@ -150,6 +171,18 @@ import AVFoundation
       }
     }
     fileTransferRenewTimer = timer
+    RunLoop.main.add(timer, forMode: .common)
+  }
+
+  private func ensureLiveActivitySyncTimer() {
+    guard liveActivitySyncTimer == nil else { return }
+    let interval = Self.liveActivitySyncIntervalSeconds
+    let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
+      guard let self = self, self.isTransferActive else { return }
+      UserDefaults(suiteName: "group.Ilyas")?.synchronize()
+      self.requestFlutterLiveActivitySync()
+    }
+    liveActivitySyncTimer = timer
     RunLoop.main.add(timer, forMode: .common)
   }
 

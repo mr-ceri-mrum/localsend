@@ -16,7 +16,10 @@ struct LocalSendLiveActivityBundle: WidgetBundle {
 struct LiveActivitiesAppAttributes: ActivityAttributes, Identifiable {
   public typealias LiveDeliveryData = ContentState
 
-  public struct ContentState: Codable, Hashable {}
+  /// Must match `live_activities` plugin `LiveActivitiesAppAttributes.ContentState` (Runner).
+  public struct ContentState: Codable, Hashable {
+    var appGroupId: String
+  }
 
   var id = UUID()
 }
@@ -41,6 +44,9 @@ private struct TransferData {
   let isSending: Bool
 
   init(context: ActivityViewContext<LiveActivitiesAppAttributes>) {
+    // Force re-read from disk — the widget runs in a separate process and may cache stale values.
+    sharedDefault.synchronize()
+
     let attrs = context.attributes
     title = sharedDefault.string(forKey: attrs.prefixedKey("title")) ?? "WinDrop"
     subtitle = sharedDefault.string(forKey: attrs.prefixedKey("subtitle")) ?? ""
@@ -97,6 +103,8 @@ struct FileTransferLiveActivityWidget: Widget {
         Text("\(d.progressPct)%")
           .font(.title3.monospacedDigit().weight(.semibold))
           .foregroundStyle(.cyan)
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
       }
       .padding()
     }
@@ -118,6 +126,8 @@ struct FileTransferLiveActivityWidget: Widget {
           Text("\(d.progressPct)%")
             .font(.caption.monospacedDigit().weight(.bold))
             .foregroundStyle(.cyan)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
         }
         ProgressView(value: d.progress)
           .tint(.cyan)
@@ -149,6 +159,9 @@ struct FileTransferLiveActivityWidget: Widget {
       Text("\(d.progressPct)%")
         .font(.caption2.monospacedDigit().weight(.bold))
         .foregroundStyle(.cyan)
+        .lineLimit(1)
+        .minimumScaleFactor(0.65)
+        .layoutPriority(1)
     }
   }
 

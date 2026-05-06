@@ -11,6 +11,7 @@ import 'package:localsend_app/pages/home_page.dart';
 import 'package:localsend_app/provider/local_ip_provider.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:localsend_app/util/native/ios_live_activity_sync.dart';
 import 'package:localsend_app/util/ui/dynamic_colors.dart';
 import 'package:localsend_app/widget/watcher/ios_transfer_background_watcher.dart';
 import 'package:localsend_app/widget/watcher/ios_transfer_live_activity_watcher.dart';
@@ -32,6 +33,8 @@ Future<void> main(List<String> args) async {
     );
     return;
   }
+
+  registerIosLiveActivityNativeSyncListener();
 
   runApp(
     RefenaScope.withContainer(

@@ -10,6 +10,8 @@ import 'package:localsend_app/pages/tabs/send_tab.dart';
 import 'package:localsend_app/pages/tabs/settings_tab.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/util/native/cross_file_converters.dart';
+import 'package:localsend_app/util/native/platform_check.dart';
+import 'package:localsend_app/widget/admob_banner.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 enum HomeTab {
@@ -111,6 +113,13 @@ class _HomePageState extends State<HomePage> with Refena {
                 ],
               ),
             ),
+            if (checkPlatformCanReceiveShareIntent())
+              const Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: AdMobBanner(),
+              ),
             if (_dragAndDropIndicator)
               Container(
                 width: double.infinity,
