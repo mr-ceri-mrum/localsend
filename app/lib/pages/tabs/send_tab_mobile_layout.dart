@@ -253,10 +253,12 @@ class SendTabMobileWifiBanner extends StatelessWidget {
 class SendTabMobileNearbySectionTitle extends StatelessWidget {
   final bool scanning;
   final VoidCallback onWindowsPeerHelpTap;
+  final bool shouldHighlightHelp;
 
   const SendTabMobileNearbySectionTitle({
     required this.scanning,
     required this.onWindowsPeerHelpTap,
+    required this.shouldHighlightHelp,
     super.key,
   });
 
@@ -280,36 +282,9 @@ class SendTabMobileNearbySectionTitle extends StatelessWidget {
           ),
           Tooltip(
             message: t.sendTab.windowsPeerHelp.tooltip,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onWindowsPeerHelpTap,
-                borderRadius: BorderRadius.circular(999),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: IosStyle.cardBorder,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: IosStyle.card),
-                      ),
-                      child: Text(
-                        kWindowsPeerDownloadSiteLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: IosStyle.mutedTextStrong,
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            child: _WindowsHelpChipButton(
+              onTap: onWindowsPeerHelpTap,
+              shouldHighlight: shouldHighlightHelp,
             ),
           ),
           if (scanning) ...[
@@ -324,6 +299,105 @@ class SendTabMobileNearbySectionTitle extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _WindowsHelpChipButton extends StatefulWidget {
+  final VoidCallback onTap;
+  final bool shouldHighlight;
+
+  const _WindowsHelpChipButton({
+    required this.onTap,
+    required this.shouldHighlight,
+  });
+
+  @override
+  State<_WindowsHelpChipButton> createState() => _WindowsHelpChipButtonState();
+}
+
+class _WindowsHelpChipButtonState extends State<_WindowsHelpChipButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _WindowsHelpChipButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncAnimation();
+  }
+
+  void _syncAnimation() {
+    if (widget.shouldHighlight) {
+      _controller.repeat(reverse: true);
+    } else {
+      _controller.stop();
+      _controller.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: widget.onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final pulse = widget.shouldHighlight ? _controller.value : 0.0;
+                final background = Color.lerp(
+                  IosStyle.cardBorder,
+                  const Color(0xFF8F1D2C),
+                  pulse,
+                )!;
+                final border = Color.lerp(
+                  IosStyle.card,
+                  const Color(0xFFE4506D),
+                  pulse,
+                )!;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: border),
+                  ),
+                  child: Text(
+                    kWindowsPeerDownloadSiteLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: IosStyle.mutedTextStrong,
+                      height: 1.1,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }

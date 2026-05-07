@@ -7,10 +7,10 @@ import 'package:routerino/routerino.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Placeholder URL until a real download landing page is wired.
-const String kWindowsPeerDownloadUrl = 'https://test.com';
+const String kWindowsPeerDownloadUrl = 'https://mr-ceri-mrum.github.io/windrop-site/';
 
-/// Host name shown on the nearby-devices hint chip (keeps in sync with [kWindowsPeerDownloadUrl]).
-String get kWindowsPeerDownloadSiteLabel => Uri.parse(kWindowsPeerDownloadUrl).host;
+/// Label shown on the nearby-devices hint chip.
+const String kWindowsPeerDownloadSiteLabel = "Don't see?";
 
 class NearbyWindowsPeerHelpSheet extends StatelessWidget {
   const NearbyWindowsPeerHelpSheet({super.key});
@@ -55,33 +55,48 @@ class NearbyWindowsPeerHelpSheet extends StatelessWidget {
     return CustomBottomSheet(
       title: t.sendTab.windowsPeerHelp.title,
       description: t.sendTab.windowsPeerHelp.description,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: accent,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final imageHeight = constraints.maxHeight < 360 ? 120.0 : 160.0;
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
+                    child: Container(
+                      height: imageHeight,
+                      color: Colors.black,
+                      child: Image.asset(
+                        'assets/img/receive_network_hero.png',
+                        height: imageHeight,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: accent,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(IosStyle.radiusMedium),
+                      ),
+                    ),
+                    onPressed: () async {
+                      await _launchDownload();
+                    },
+                    child: Text(t.sendTab.windowsPeerHelp.downloadCta),
+                  ),
+                ],
               ),
-              onPressed: () async {
-                await _launchDownload();
-              },
-              child: Text(t.sendTab.windowsPeerHelp.downloadCta),
             ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => context.pop(),
-              child: Text(t.general.close),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

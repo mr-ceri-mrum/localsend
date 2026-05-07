@@ -185,6 +185,7 @@ class SendTab extends StatelessWidget {
                           SendTabMobileNearbySectionTitle(
                             scanning: scanning,
                             onWindowsPeerHelpTap: () async => NearbyWindowsPeerHelpSheet.open(context),
+                            shouldHighlightHelp: vm.nearbyDevices.isEmpty,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 4, bottom: 8),

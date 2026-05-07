@@ -4,15 +4,14 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/init.dart';
 import 'package:localsend_app/gen/strings.g.dart';
-import 'package:localsend_app/pages/home_page_controller.dart';
-import 'package:localsend_app/pages/tabs/receive_tab.dart';
-import 'package:localsend_app/pages/tabs/send_tab.dart';
+import 'package:localsend_app/pages/receive_history_page.dart';
 import 'package:localsend_app/pages/tabs/settings_tab.dart';
+import 'package:localsend_app/pages/tabs/send_tab.dart';
 import 'package:localsend_app/provider/selection/selected_sending_files_provider.dart';
 import 'package:localsend_app/util/native/cross_file_converters.dart';
-import 'package:localsend_app/util/native/platform_check.dart';
-import 'package:localsend_app/widget/admob_banner.dart';
+import 'package:localsend_app/widget/custom_icon_button.dart';
 import 'package:refena_flutter/refena_flutter.dart';
+import 'package:routerino/routerino.dart';
 
 enum HomeTab {
   receive(Icons.wifi),
@@ -60,7 +59,6 @@ class _HomePageState extends State<HomePage> with Refena {
     super.initState();
 
     ensureRef((ref) async {
-      ref.redux(homePageControllerProvider).dispatch(ChangeTabAction(widget.initialTab));
       await postInit(context, ref, widget.appStart);
     });
   }
@@ -68,7 +66,6 @@ class _HomePageState extends State<HomePage> with Refena {
   @override
   Widget build(BuildContext context) {
     Translations.of(context); // rebuild on locale change
-    final vm = context.watch(homePageControllerProvider);
 
     return DropTarget(
       onDragEntered: (_) {
@@ -96,30 +93,38 @@ class _HomePageState extends State<HomePage> with Refena {
                 ),
               );
         }
-        vm.changeTab(HomeTab.send);
       },
       child: Scaffold(
         body: Stack(
           children: [
             Container(
               color: Theme.of(context).scaffoldBackgroundColor,
-              child: PageView(
-                controller: vm.controller,
-                physics: const NeverScrollableScrollPhysics(),
-                children: const [
-                  SafeArea(child: ReceiveTab()),
-                  SafeArea(child: SendTab()),
-                  SettingsTab(),
+              child: const SafeArea(
+                child: SendTab(),
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 8,
+              right: 16,
+              child: Row(
+                children: [
+                  CustomIconButton(
+                    onPressed: () async => context.push(() => const ReceiveHistoryPage()),
+                    child: const Icon(Icons.history, size: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  CustomIconButton(
+                    onPressed: () async => context.push(
+                      () => const Scaffold(
+                        body: SettingsTab(),
+                      ),
+                    ),
+                    child: const Icon(Icons.settings, size: 20),
+                  ),
                 ],
               ),
             ),
-            if (checkPlatformCanReceiveShareIntent())
-              const Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: AdMobBanner(),
-              ),
+            // Temporarily hidden: release without ads.
             if (_dragAndDropIndicator)
               Container(
                 width: double.infinity,
@@ -136,13 +141,6 @@ class _HomePageState extends State<HomePage> with Refena {
                 ),
               ),
           ],
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: vm.currentTab.index,
-          onDestinationSelected: (index) => vm.changeTab(HomeTab.values[index]),
-          destinations: HomeTab.values.map((tab) {
-            return NavigationDestination(icon: Icon(tab.icon), label: tab.label);
-          }).toList(),
         ),
       ),
     );
